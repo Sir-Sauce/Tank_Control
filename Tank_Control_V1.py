@@ -17,7 +17,7 @@ def MattTest():
 ExitButton = tk.Button(text='Exit', command = Exitf)
 ExitButton.place(x = 20, y = 160)
 
-label1 = tk.label(text= "Test")
+label1 = tk.Label(text= "Test")
 label1.place(x = 20, y = 80)
 
 window.mainloop()
