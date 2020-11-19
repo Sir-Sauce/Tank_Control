@@ -18,6 +18,6 @@ ExitButton = tk.Button(text='Exit', command = Exitf)
 ExitButton.place(x = 20, y = 160)
 
 label1 = tk.label(text= "Test")
-ExitButton.place(x = 20, y = 80)
+label1.place(x = 20, y = 80)
 
 window.mainloop()
