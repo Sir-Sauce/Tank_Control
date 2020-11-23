@@ -20,7 +20,7 @@ radio_values = {"off" : "1",
 
 #establish functions
 def Exitf():
-    quit()
+    window.destroy()
 
 def Start():
     global Start; Start = True
