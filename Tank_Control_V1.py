@@ -1,24 +1,35 @@
-#This is my first update!!
+"""
+MCE 433 - Tank Control Project
+Authors: Austin Clark & Matthew Morgan
+
+"""
+
+# --- Libraries Used --- #
+
 import time
 import tkinter as tk
+
+
+# --- GUI Window Creation --- #
 
 window = tk.Tk()                                #initialize tkinter GUI 
 window.title("Tank Control GUI")           
 window.geometry('600x300')                      #Sets application window size
 window.configure(background='light gray')
 
-#initial variables
+# --- Constant Variables --- #
+
 mode = 'off'
 dispense = 'off'
+radio_values = {"off" : "1", "on" : "2", "Auto" : "3"} #radio button index
+
+# --- Chaning Variables --- #
+
 height = 0
 current_height = 20
 
-#radio button index
-radio_values = {"off" : "1", 
-                "on" : "2", 
-                "Auto" : "3"} 
+# --- GUI Functions --- #
 
-#establish functions
 def Exitf():
     window.destroy()
 
@@ -43,11 +54,15 @@ def Dispense(dispense_mode):
         forget(Dispense_off); retrieve(Dispense_on, 200, 15)
         
 
+# --- State Functions --- #
+
 def Get_Height():  
     sel = "Tank Height = " #+ str(height.get()) 
     Scale.config(text = sel) 
 
-#Buttons
+
+
+# --- GUI Buttons --- #
 
 Exit_Button = tk.Button(text='Exit', command = Exitf)
 Exit_Button.place(x = 20, y = 20)
@@ -61,7 +76,7 @@ Dispense_on.place(x = 200, y = 15)
 Dispense_off = tk.Button(text='Dispense: Off', command = lambda: Dispense("off"))
 Dispense_off.place(x = 300, y = 15)
 
-# Labels indicating control parameters
+# --- GUI Control Labels --- #
 
 Control_label = tk.Label(text= "Control Mode", width = 15)
 Control_label.place(x = 200, y = 80)
@@ -84,7 +99,8 @@ Height_Set.place(x = 440, y = 100)
 Scale = tk.Label()
 Scale.place(x = 300, y = 330)
 
-#Output labels (for displaying continuously refreshed parameters) 
+# --- GUI Output Labels --- #
+#for displaying continuously refreshed parameters
 
 Control_label1 = tk.Label(text= mode, width = 5)
 Control_label1.place(x = 350, y = 80)
@@ -109,10 +125,10 @@ for (text, value) in radio_values.items():
     tk.Radiobutton(window, text = text, variable = radio_values,
      value = value, width = 10).place(x = 20, y = 120+int(value)*20)
 
-#Begin mainloop
+# --- State Logic --- #
 while(Start == True):
     break
 
-#Begin GUI mainloop    
+# --- Begin GUI Mainloop --- #    
 
 window.mainloop()
