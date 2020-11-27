@@ -146,25 +146,25 @@ for (text, value) in radio_values.items():
 # --- State Logic --- #
 
 if(Start == True):
-    if(radio_values == 1):
+    if(radio_values == 1):                      #inlet closed
         pass
-    elif(radio_values == 2):
+    elif(radio_values == 2):                    #inlet open
         Inlet_Open()
     else:
-        if(current_height <= (height - 0.5)):
+        if(current_height <= (height - 0.5)):   #inlet auto mode
             Inlet_Open()
         else:
             pass
-    if (dispense_txt == "On"):
+    if (dispense_txt == "On"):                  #dispense on
         Dispense("on")
-    else:
+    else:                                       #dispense off   
         pass
-    if (height >= 95.0):
+    if (height >= 95.0):                        #set warning labels (high)
         flag = "Warning: High Tank Level"
-    elif (height <= 20.0):
+    elif (height <= 20.0):                      #set warning labels (low)
         flag = "Warning: Low Tank Level"
     else:
-        flag = " "
+        flag = " "                              #set warning labels (none)
     Warnings.config(text = flag)
 else:
     pass
