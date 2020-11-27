@@ -1,14 +1,11 @@
 """
 MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
-
 """
-
 # --- Libraries Used --- #
 
 import time
 import tkinter as tk
-
 
 # --- GUI Window Creation --- #
 
@@ -17,11 +14,12 @@ window.title("Tank Control GUI")
 window.geometry('600x300')                      #Sets application window size
 window.configure(background = 'light gray')
 
-# --- Constant Variables --- #
-dispense_txt = "off"
-#dispense_var = tk.StringVar()
+# --- Initial Variables --- #
+dispense_txt = "Off"
+dispense_var = tk.StringVar()
 mode = 'Off'
 radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"} #radio button index
+flag = " "
 
 # --- Chaning Variables --- #
 
@@ -42,30 +40,17 @@ def forget(Widget):
     Widget.place_forget()
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
-
-def Dispense(dispense_mode):
-    global dispense_txt
-    if (dispense_mode == "on"):
-        dispense_mode = True
-        dispense_txt = "On"
-        forget(Dispense_on); retrieve(Dispense_off, 300, 15)
-    else: 
-        dispense_mode = False
-        dispense_txt = "Off"
-        forget(Dispense_off); retrieve(Dispense_on, 200, 15)   
-    window.update_idletasks()
          
 # --- State Functions --- #
 
-#def Get_Height():  
-#    sel = "Tank Height = " #+ str(height.get()) 
-#    Scale.config(text = sel) 
-
-def Dispense_Open():
-    global current_height
-    current_height -= 0.5
-    print(current_height)
-    time.sleep(1)
+def Dispense_Open(dispense_mode):
+    if (dispense_mode == True):
+        global current_height
+        current_height -= 0.5
+        print(current_height)
+        time.sleep(1)
+    else:
+        pass
 
 def Inlet_Open():
     global current_height
@@ -74,7 +59,21 @@ def Inlet_Open():
     time.sleep(1)
 
 
-
+def Dispense(dispense_mode):
+    if (Start == True):
+        global dispense_txt
+        if (dispense_mode == "on"):
+            Dispense_Open(True)
+            dispense_txt = "On"
+            forget(Dispense_on); retrieve(Dispense_off, 300, 15)
+        else: 
+            dispense_txt = "Off"
+            forget(Dispense_off); retrieve(Dispense_on, 200, 15)   
+            #Dispense_Open(False)
+        #print(dispense_txt) #troubleshoot
+        Dispense_Mode1.config(text = dispense_txt)
+    else:
+        pass
 
 # --- GUI Buttons --- #
 
@@ -110,6 +109,9 @@ Control_Set.place(x = 20, y = 100)
 Height_Set = tk.Label(text= "Tank Height Setting", width = 15)
 Height_Set.place(x = 440, y = 100)
 
+Warnings = tk.Label(text = flag, bg = "yellow", width = 25)
+Warnings.place(x = 185, y = 250)
+
 Scale = tk.Label()
 Scale.place(x = 300, y = 330)
 
@@ -127,13 +129,12 @@ Desired_Height1.place(x = 350, y = 160)
 
 Dispense_Mode1 = tk.Label(text= dispense_txt, width = 5)
 Dispense_Mode1.place(x = 350, y = 200)
-#dispense_var.set(dispense_txt)
 
 # Slider Widget to set height
 
 Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') 
 Height_Scalar.place(x = 475, y = 140)
-Scale.config(text = "Tank Height")
+#Scale.config(text = "Tank Height")
 Height_Scalar.set(50.0)
 
 #establish radio button layout
@@ -144,8 +145,29 @@ for (text, value) in radio_values.items():
 
 # --- State Logic --- #
 
-while(Start == True):
-    break
+if(Start == True):
+    if(radio_values == 1):
+        pass
+    elif(radio_values == 2):
+        Inlet_Open()
+    else:
+        if(current_height <= (height - 0.5)):
+            Inlet_Open()
+        else:
+            pass
+    if (dispense_txt == "On"):
+        Dispense("on")
+    else:
+        pass
+    if (height >= 95.0):
+        flag = "Warning: High Tank Level"
+    elif (height <= 20.0):
+        flag = "Warning: Low Tank Level"
+    else:
+        flag = " "
+    Warnings.config(text = flag)
+else:
+    pass
 
 # --- Begin GUI Mainloop --- #    
 
