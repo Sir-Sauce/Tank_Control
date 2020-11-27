@@ -15,18 +15,18 @@ import tkinter as tk
 window = tk.Tk()                                #initialize tkinter GUI 
 window.title("Tank Control GUI")           
 window.geometry('600x300')                      #Sets application window size
-window.configure(background='light gray')
+window.configure(background = 'light gray')
 
 # --- Constant Variables --- #
-
-mode = 'off'
-dispense = 'off'
-radio_values = {"off" : "1", "on" : "2", "Auto" : "3"} #radio button index
+dispense_txt = "off"
+#dispense_var = tk.StringVar()
+mode = 'Off'
+radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"} #radio button index
 
 # --- Chaning Variables --- #
 
-height = 0
-current_height = 20
+height = 50.0
+current_height = 50.0
 
 # --- GUI Functions --- #
 
@@ -40,25 +40,39 @@ def Start():
 
 def forget(Widget):
     Widget.place_forget()
-
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
 
 def Dispense(dispense_mode):
-    global dispense
+    global dispense_txt
     if (dispense_mode == "on"):
-        dispense = True
+        dispense_mode = True
+        dispense_txt = "On"
         forget(Dispense_on); retrieve(Dispense_off, 300, 15)
-    if(dispense_mode == "off"):
+    else: 
         dispense_mode = False
-        forget(Dispense_off); retrieve(Dispense_on, 200, 15)
-        
-
+        dispense_txt = "Off"
+        forget(Dispense_off); retrieve(Dispense_on, 200, 15)   
+    window.update_idletasks()
+         
 # --- State Functions --- #
 
-def Get_Height():  
-    sel = "Tank Height = " #+ str(height.get()) 
-    Scale.config(text = sel) 
+#def Get_Height():  
+#    sel = "Tank Height = " #+ str(height.get()) 
+#    Scale.config(text = sel) 
+
+def Dispense_Open():
+    global current_height
+    current_height -= 0.5
+    print(current_height)
+    time.sleep(1)
+
+def Inlet_Open():
+    global current_height
+    current_height += 2
+    print(current_height)
+    time.sleep(1)
+
 
 
 
@@ -111,13 +125,16 @@ Tank_Height1.place(x = 350, y = 120)
 Desired_Height1 = tk.Label(text= height, width = 5)
 Desired_Height1.place(x = 350, y = 160)
 
-Dispense_Mode1 = tk.Label(text= dispense, width = 5)
+Dispense_Mode1 = tk.Label(text= dispense_txt, width = 5)
 Dispense_Mode1.place(x = 350, y = 200)
+#dispense_var.set(dispense_txt)
 
 # Slider Widget to set height
 
-Height_Scalar = tk.Scale(window, bg = 'light grey', from_ = 100, to = 0, orient = 'vertical') 
+Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') 
 Height_Scalar.place(x = 475, y = 140)
+Scale.config(text = "Tank Height")
+Height_Scalar.set(50.0)
 
 #establish radio button layout
 
@@ -126,6 +143,7 @@ for (text, value) in radio_values.items():
      value = value, width = 10).place(x = 20, y = 120+int(value)*20)
 
 # --- State Logic --- #
+
 while(Start == True):
     break
 
