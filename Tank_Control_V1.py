@@ -15,11 +15,12 @@ window.geometry('600x300')                      #Sets application window size
 window.configure(background = 'light gray')
 
 # --- Initial Variables --- #
-dispense_txt = "Off"
-dispense_var = tk.StringVar()
+global Dispense_State; Dispense_State = "Off" #dispense_txt = "Off"
+#dispense_var = tk.StringVar()
 mode = 'Off'
 radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"} #radio button index
 flag = " "
+global Inlet_State; Inlet_State = 1
 
 # --- Changing Variables --- #
 
@@ -36,6 +37,7 @@ def Start():
     Start_Button.place_forget()
     time.sleep(0.1)
     print('start button')
+    #window.after(0, State_Logic)
 
 def forget(Widget):
     Widget.place_forget()
@@ -45,9 +47,13 @@ def retrieve(Widget, x, y):
          
 # --- State Functions --- #
 
+def Get_Tank_Height(): 
+    height = Height_Scalar.get()
+    print(height)
+
 def Dispense_Open(dispense_mode):
-    if (dispense_mode == True):
-        global current_height
+    global current_height
+    if ((dispense_mode == True) and (current_height > 0.0)):
         current_height -= 0.5
         print(current_height)
         time.sleep(0.1)
@@ -56,26 +62,29 @@ def Dispense_Open(dispense_mode):
 
 def Inlet_Open():
     global current_height
-    current_height += 2
-    print(current_height)
-    time.sleep(0.1)
+    if (current_height < 100.0): 
+        current_height += 2
+        print(current_height)
+        time.sleep(0.1)
+    else:
+        pass
 
 
 def Dispense(dispense_mode):
     if (Start == True):
-        global dispense_txt
+        global Dispense_State
         if (dispense_mode == "on"):
             Dispense_Open(True)
-            dispense_txt = "On"
+            Dispense_State = "On"
             forget(Dispense_on); retrieve(Dispense_off, 300, 15)
             print('dispense on')
         else: 
-            dispense_txt = "Off"
+            Dispense_State = "Off"
             forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
             print('dispense off')
             #Dispense_Open(False)
         #print(dispense_txt) #troubleshoot
-        Dispense_Mode1.config(text = dispense_txt) #must be moved to before the dispense function is called to prevent delay
+        Dispense_Mode1.config(text = Dispense_State) #must be moved to before the dispense function is called to prevent delay
     else:
         pass
     
@@ -91,6 +100,48 @@ def Warning_Status():
         print("Warning: Low Tank nominal")
     Warnings.config(text = flag)
 
+
+# --- State Logic --- #
+
+#Two seperate state logic functions for "two" concurrently active states
+
+def Inlet_State_Logic(Inlet_State):             
+    if(Start == True):
+        print("executing state logic")
+        Get_Tank_Height()                           #get target tank height from scale
+        print(radio_values)      
+
+        #Inlet Status
+        if(Inlet_State == 1):                       #inlet closed
+            print("off-inlet closed")
+            pass
+        elif(Inlet_State == 2):                     #inlet open
+            Inlet_Open()
+            print("on-inlet open")
+        else:
+            if(current_height <= (height - 0.5)):   #inlet auto mode
+                Inlet_Open()
+                print("auto-inlet open")
+            else:
+                print("auto-inlet closed")
+                pass
+    else:
+        pass
+    Warning_Status()                                #Check tank status for Warnings
+
+def Dispense_State_Logic(Dispense_State):
+    if(Start == True):
+        #Dispense Status
+        if (Dispense_State == "On"):                #dispense on
+            Dispense("on")
+        else:       
+            Dispense("off")                         #dispense off   
+            pass                       
+        
+    else:
+        pass
+    Warning_Status()                                #Check tank status for Warnings
+
 # --- GUI Buttons --- #
    
 Exit_Button = tk.Button(text='Exit', command = Exitf)
@@ -99,10 +150,10 @@ Exit_Button.place(x = 20, y = 20)
 Start_Button = tk.Button(text='Start', command = Start)
 Start_Button.place(x = 20, y = 50)
 
-Dispense_on = tk.Button(text='Dispense: On', command = lambda: Dispense("on"))
+Dispense_on = tk.Button(text='Dispense: On', command = lambda: Dispense_State_Logic("On"))
 Dispense_on.place(x = 200, y = 15)
 
-Dispense_off = tk.Button(text='Dispense: Off', command = lambda: Dispense("off"))
+Dispense_off = tk.Button(text='Dispense: Off', command = lambda: Dispense_State_Logic("Off"))
 Dispense_off.place(x = 300, y = 15)
 
 # --- GUI Control Labels --- #
@@ -143,7 +194,7 @@ Tank_Height1.place(x = 350, y = 120)
 Desired_Height1 = tk.Label(text= height, width = 5)
 Desired_Height1.place(x = 350, y = 160)
 
-Dispense_Mode1 = tk.Label(text= dispense_txt, width = 5)
+Dispense_Mode1 = tk.Label(text= Dispense_State, width = 5)
 Dispense_Mode1.place(x = 350, y = 200)
 
 # Slider Widget to set height
@@ -156,37 +207,8 @@ Height_Scalar.set(50.0)
 #establish radio button layout
 
 for (text, value) in radio_values.items(): 
-    tk.Radiobutton(window, text = text, variable = radio_values,
-     value = value, width = 10).place(x = 20, y = 120+int(value)*20)
-
-# --- State Logic --- #
-
-if(Start == True):
-    print(radio_values)
-        #Inlet Status
-    if(radio_values == 1):                      #inlet closed
-        print("off-inlet closed")
-        pass
-    elif(radio_values == 2):                    #inlet open
-        Inlet_Open()
-        print("on-inlet open")
-    else:
-        if(current_height <= (height - 0.5)):   #inlet auto mode
-            Inlet_Open()
-            print("auto-inlet open")
-        else:
-            print("auto-inlet closed")
-            pass
-        #Dispense Status
-    if (dispense_txt == "On"):                  #dispense on
-        Dispense("on")
-    else:                                       #dispense off   
-        pass
-        
-    Warning_Status()                            #Check tank status for Warnings
-    
-else:
-    pass
+    tk.Radiobutton(window, text = text, variable = Inlet_State,
+    value = value, width = 10, command = lambda: Inlet_State_Logic(Inlet_State)).place(x = 20, y = 120+int(value)*20)
 
 # --- Begin GUI Mainloop --- #    
 
