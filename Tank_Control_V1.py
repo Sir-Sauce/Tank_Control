@@ -71,12 +71,12 @@ def Dispense(dispense_mode):
             forget(Dispense_off); retrieve(Dispense_on, 200, 15)   
             #Dispense_Open(False)
         #print(dispense_txt) #troubleshoot
-        Dispense_Mode1.config(text = dispense_txt)
+        Dispense_Mode1.config(text = dispense_txt) #must be moved to before the dispense function is called to prevent delay
     else:
         pass
 
 # --- GUI Buttons --- #
-
+   
 Exit_Button = tk.Button(text='Exit', command = Exitf)
 Exit_Button.place(x = 20, y = 20)
 
