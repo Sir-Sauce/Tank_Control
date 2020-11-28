@@ -21,7 +21,7 @@ mode = 'Off'
 radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"} #radio button index
 flag = " "
 
-# --- Chaning Variables --- #
+# --- Changing Variables --- #
 
 height = 50.0
 current_height = 50.0
@@ -35,9 +35,11 @@ def Start():
     global Start; Start = True
     Start_Button.place_forget()
     time.sleep(0.1)
+    print('start button')
 
 def forget(Widget):
     Widget.place_forget()
+    
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
          
@@ -48,7 +50,7 @@ def Dispense_Open(dispense_mode):
         global current_height
         current_height -= 0.5
         print(current_height)
-        time.sleep(1)
+        time.sleep(0.1)
     else:
         pass
 
@@ -56,7 +58,7 @@ def Inlet_Open():
     global current_height
     current_height += 2
     print(current_height)
-    time.sleep(1)
+    time.sleep(0.1)
 
 
 def Dispense(dispense_mode):
@@ -66,14 +68,28 @@ def Dispense(dispense_mode):
             Dispense_Open(True)
             dispense_txt = "On"
             forget(Dispense_on); retrieve(Dispense_off, 300, 15)
+            print('dispense on')
         else: 
             dispense_txt = "Off"
-            forget(Dispense_off); retrieve(Dispense_on, 200, 15)   
+            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
+            print('dispense off')
             #Dispense_Open(False)
         #print(dispense_txt) #troubleshoot
         Dispense_Mode1.config(text = dispense_txt)
     else:
         pass
+    
+def Warning_Status():
+    if (height >= 95.0):                        #set warning labels (high)
+        flag = "Warning: High Tank Level"
+        print('tank level high')
+    elif (height <= 20.0):                      #set warning labels (low)
+        flag = "Warning: Low Tank Level"
+        print('tank level low')
+    else:
+        flag = " "                              #set warning labels (none)
+        print("Warning: Low Tank nominal")
+    Warnings.config(text = flag)
 
 # --- GUI Buttons --- #
 
@@ -146,26 +162,29 @@ for (text, value) in radio_values.items():
 # --- State Logic --- #
 
 if(Start == True):
+    print(radio_values)
+        #Inlet Status
     if(radio_values == 1):                      #inlet closed
+        print("off-inlet closed")
         pass
     elif(radio_values == 2):                    #inlet open
         Inlet_Open()
+        print("on-inlet open")
     else:
         if(current_height <= (height - 0.5)):   #inlet auto mode
             Inlet_Open()
+            print("auto-inlet open")
         else:
+            print("auto-inlet closed")
             pass
+        #Dispense Status
     if (dispense_txt == "On"):                  #dispense on
         Dispense("on")
     else:                                       #dispense off   
         pass
-    if (height >= 95.0):                        #set warning labels (high)
-        flag = "Warning: High Tank Level"
-    elif (height <= 20.0):                      #set warning labels (low)
-        flag = "Warning: Low Tank Level"
-    else:
-        flag = " "                              #set warning labels (none)
-    Warnings.config(text = flag)
+        
+    Warning_Status()                            #Check tank status for Warnings
+    
 else:
     pass
 
