@@ -15,17 +15,14 @@ window.geometry('600x300')                      #Sets application window size
 window.configure(background = 'light gray')
 
 # --- Initial Variables --- #
-global Dispense_State; Dispense_State = "Off" #dispense_txt = "Off"
-#dispense_var = tk.StringVar()
-mode = 'Off'
-radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"} #radio button index
+
+global Dispense_State; Dispense_State = "Off" 
+radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"}  #radio button index
 flag = " "
 global Inlet_State; Inlet_State = 1
-
-# --- Changing Variables --- #
-
 height = 50.0
 current_height = 50.0
+mode = "Off"
 
 # --- GUI Functions --- #
 
@@ -37,7 +34,6 @@ def Start():
     Start_Button.place_forget()
     time.sleep(0.1)
     print('start button')
-    #window.after(0, State_Logic)
 
 def forget(Widget):
     Widget.place_forget()
@@ -56,18 +52,18 @@ def Dispense_Open(dispense_mode):
     if ((dispense_mode == True) and (current_height > 0.0)):
         current_height -= 0.5
         print(current_height)
-        time.sleep(0.1)
+        #time.sleep(1000)
     else:
         pass
 
 def Inlet_Open():
     global current_height
-    if (current_height < 100.0): 
+    while (current_height < 100.0): 
         current_height += 2
         print(current_height)
-        time.sleep(0.1)
-    else:
-        pass
+        time.sleep(1000)
+    #else:
+    #    pass
 
 
 def Dispense(dispense_mode):
@@ -118,13 +114,14 @@ def Inlet_State_Logic(Inlet_State):
         elif(Inlet_State == 2):                     #inlet open
             Inlet_Open()
             print("on-inlet open")
-        else:
+        elif(Inlet_State == 3):
             if(current_height <= (height - 0.5)):   #inlet auto mode
                 Inlet_Open()
                 print("auto-inlet open")
             else:
                 print("auto-inlet closed")
-                pass
+        else:
+            pass
     else:
         pass
     Warning_Status()                                #Check tank status for Warnings
@@ -137,10 +134,14 @@ def Dispense_State_Logic(Dispense_State):
         else:       
             Dispense("off")                         #dispense off   
             pass                       
-        
     else:
         pass
     Warning_Status()                                #Check tank status for Warnings
+
+#def Timer_Func():
+#    Dispense_State_Logic(Dispense_State)
+#    Inlet_State_Logic(Inlet_State)
+#    window.after(1000, Timer_Func())
 
 # --- GUI Buttons --- #
    
@@ -212,4 +213,5 @@ for (text, value) in radio_values.items():
 
 # --- Begin GUI Mainloop --- #    
 
+#window.after(1000, Timer_Func())
 window.mainloop()
