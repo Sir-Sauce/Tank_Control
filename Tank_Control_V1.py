@@ -22,8 +22,15 @@ flag = " "
 
 global Inlet_State; Inlet_State = 1
 height = 50.0
-current_height = 50.0
+global current_height; current_height = 50.0
 mode = "Off"
+
+global Start_Time; Start_Time = time.time()
+print(Start_Time)
+
+global State_1_Interval; State_1_Interval = 2
+global State_2_Interval; State_2_Interval = 0.5
+
 
 # --- GUI Functions --- #
 
@@ -76,11 +83,11 @@ def Get_Tank_Height():
 ########## Must store a start time, store button on time, at each interval do something
 ########## Perform while loop, with embedded timer functions to do above
 
-def Dispense_Open(dispense_mode):
+def Dispense_Open():
     
     global current_height
     
-    if ((dispense_mode == True) and (current_height > 0.0)):
+    if (time.time and (current_height > 0.0)):
         current_height -= 0.5
         print("current tank height: " + current_height)
         #time.sleep(1000)
@@ -94,11 +101,30 @@ def Inlet_Open():
     
     
     ########## Change while loop to if(timer<starttime-interval) then increase ht. 
-    while (current_height < 100.0): 
+    if(time.time() > Start_Time + 1):
         current_height += 2
         print("current tank height: " + current_height)
-        time.sleep(1000)
         
+    # while (current_height < 100.0): 
+    #     current_height += 2
+    #     print("current tank height: " + current_height)
+    #     time.sleep(1000)
+        
+
+############ Timer tasks to update states
+
+# def Timer():
+#     if(time.time() > Start_Time + 1):
+#         if(Dispense_State == 'On' and current_height > 0):
+#             current_height -= 0.5
+#             window.update()
+#         else:
+#             print('Cannot Dispense - Tank is Empty')
+#         #if()
+
+
+
+
 
 
 def Warning_Status():
@@ -126,6 +152,7 @@ def Inlet_State_Logic(Inlet_State):
     if(Start == True):
         #Pre-process 
         print("executing state logic")
+        print(Inlet_State)
         Get_Tank_Height()                           #get target tank height from scale      
         Warning_Status() 
         
@@ -146,6 +173,7 @@ def Inlet_State_Logic(Inlet_State):
                 print("auto-inlet open")
             
             else:
+                Inlet_State = 1
                 print("auto-inlet closed")
         else:
             pass
@@ -159,6 +187,7 @@ def Dispense_State_Logic(Dispense_State):
         #Dispense Status
         
         if (Dispense_State == "On"):                #dispense on
+            Dispense_Open()    
             Dispense("on")
         
         else:       
