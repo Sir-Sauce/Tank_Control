@@ -54,17 +54,14 @@ def Get_Tank_Height():
     height = Height_Scalar.get()
     print(height)
 
-<<<<<<< HEAD
 def Dispense_Open():
     
     global current_height
     
     if (time.time and (current_height > 0.0)):
-=======
 def Dispense_Open(dispense_mode):
     global current_height
     if ((dispense_mode == True) and (current_height > 0.0)):
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
         current_height -= 0.5
         print(current_height)
         #time.sleep(1000)
@@ -73,7 +70,6 @@ def Dispense_Open(dispense_mode):
 
 def Inlet_Open():
     global current_height
-<<<<<<< HEAD
     
     
     ########## Change while loop to if(timer<starttime-interval) then increase ht. 
@@ -101,14 +97,12 @@ def Inlet_Open():
 
 
 
-=======
     while (current_height < 100.0): 
         current_height += 2
         print(current_height)
         time.sleep(1000)
     #else:
     #    pass
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
 
 
 def Dispense(dispense_mode):
@@ -149,18 +143,15 @@ def Warning_Status():
 def Inlet_State_Logic(Inlet_State):             
     if(Start == True):
         print("executing state logic")
-<<<<<<< HEAD
         print(Inlet_State)
         Get_Tank_Height()                           #get target tank height from scale      
         Warning_Status() 
         
         #Inlet status
-=======
         Get_Tank_Height()                           #get target tank height from scale
         print(radio_values)      
 
         #Inlet Status
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
         if(Inlet_State == 1):                       #inlet closed
             print("off-inlet closed")
             pass
