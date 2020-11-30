@@ -1,5 +1,4 @@
 """
-NEW
 MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
 """
@@ -20,6 +19,7 @@ window.configure(background = 'light gray')
 global Dispense_State; Dispense_State = "Off" 
 radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"}  #radio button index
 flag = " "
+
 global Inlet_State; Inlet_State = 1
 height = 50.0
 global current_height; current_height = 50.0
@@ -48,39 +48,56 @@ def forget(Widget):
     
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
+    
+def Dispense(dispense_mode):
+    
+    if (Start == True):
+        global Dispense_State
+     
+        if (dispense_mode == "on"):
+            Dispense_Open(True)
+            Dispense_State = "On"
+            forget(Dispense_on); retrieve(Dispense_off, 300, 15)
+            print('dispense on')
+        
+        else: 
+            Dispense_State = "Off"
+            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
+            print('dispense off')
+            #Dispense_Open(False)
+        #print(dispense_txt) #troubleshoot
+        Dispense_Mode1.config(text = Dispense_State) #must be moved to before the dispense function is called to prevent delay
+    else:
+        pass
          
 # --- State Functions --- #
 
 def Get_Tank_Height(): 
+    
     height = Height_Scalar.get()
-    print(height)
+    print("Scalar height " + height)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
+########## Dispense and Inlet need to operate from timer functions
+########## Must store a start time, store button on time, at each interval do something
+########## Perform while loop, with embedded timer functions to do above
+
 def Dispense_Open():
     
     global current_height
     
     if (time.time and (current_height > 0.0)):
-=======
-def Dispense_Open(dispense_mode):
-    global current_height
-=======
-def Dispense_Open(dispense_mode):
-    global current_height
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
-    if ((dispense_mode == True) and (current_height > 0.0)):
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
         current_height -= 0.5
-        print(current_height)
+        print("current tank height: " + current_height)
         #time.sleep(1000)
+    
     else:
         pass
 
 def Inlet_Open():
+    
     global current_height
-<<<<<<< HEAD
-<<<<<<< HEAD
     
     
     ########## Change while loop to if(timer<starttime-interval) then increase ht. 
@@ -93,18 +110,9 @@ def Inlet_Open():
     #     print("current tank height: " + current_height)
     #     time.sleep(1000)
         
-=======
-    while (current_height < 100.0): 
-        current_height += 2
-        print(current_height)
-        time.sleep(1000)
-    #else:
-    #    pass
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
 
 ############ Timer tasks to update states
 
-<<<<<<< HEAD
 # def Timer():
 #     if(time.time() > Start_Time + 1):
 #         if(Dispense_State == 'On' and current_height > 0):
@@ -117,46 +125,21 @@ def Inlet_Open():
 
 
 
-=======
-    while (current_height < 100.0): 
-        current_height += 2
-        print(current_height)
-        time.sleep(1000)
-    #else:
-    #    pass
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
 
 
-=======
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
-def Dispense(dispense_mode):
-    if (Start == True):
-        global Dispense_State
-        if (dispense_mode == "on"):
-            Dispense_Open(True)
-            Dispense_State = "On"
-            forget(Dispense_on); retrieve(Dispense_off, 300, 15)
-            print('dispense on')
-        else: 
-            Dispense_State = "Off"
-            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
-            print('dispense off')
-            #Dispense_Open(False)
-        #print(dispense_txt) #troubleshoot
-        Dispense_Mode1.config(text = Dispense_State) #must be moved to before the dispense function is called to prevent delay
-    else:
-        pass
-    
 def Warning_Status():
+    
     if (height >= 95.0):                        #set warning labels (high)
         flag = "Warning: High Tank Level"
         print('tank level high')
+    
     elif (height <= 20.0):                      #set warning labels (low)
         flag = "Warning: Low Tank Level"
         print('tank level low')
+    
     else:
         flag = " "                              #set warning labels (none)
-        print("Warning: Low Tank nominal")
+        print("Warning: Tank Level nominal")
     Warnings.config(text = flag)
 
 
@@ -165,51 +148,48 @@ def Warning_Status():
 #Two seperate state logic functions for "two" concurrently active states
 
 def Inlet_State_Logic(Inlet_State):             
+    
     if(Start == True):
+        #Pre-process 
         print("executing state logic")
-<<<<<<< HEAD
-<<<<<<< HEAD
         print(Inlet_State)
         Get_Tank_Height()                           #get target tank height from scale      
         Warning_Status() 
         
         #Inlet status
-=======
-=======
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
-        Get_Tank_Height()                           #get target tank height from scale
-        print(radio_values)      
-
-        #Inlet Status
-<<<<<<< HEAD
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
-=======
->>>>>>> parent of e231e99... Update Tank_Control_V1.py
         if(Inlet_State == 1):                       #inlet closed
             print("off-inlet closed")
             pass
+        
         elif(Inlet_State == 2):                     #inlet open
             Inlet_Open()
             print("on-inlet open")
+        
         elif(Inlet_State == 3):
+            print("Auto mode")
+            
             if(current_height <= (height - 0.5)):   #inlet auto mode
                 Inlet_Open()
                 print("auto-inlet open")
+            
             else:
                 Inlet_State = 1
                 print("auto-inlet closed")
         else:
             pass
     else:
-        pass
-    Warning_Status()                                #Check tank status for Warnings
+        print("Not Started")
+                                   #Check tank status for Warnings
 
 def Dispense_State_Logic(Dispense_State):
+    
     if(Start == True):
         #Dispense Status
+        
         if (Dispense_State == "On"):                #dispense on
             Dispense_Open()    
             Dispense("on")
+        
         else:       
             Dispense("off")                         #dispense off   
             pass                       
