@@ -1,4 +1,10 @@
 """
+OLD FILE NOT FOR USE
+NEW FILE IS V1.2
+
+PLZ DON'T USE OR PUSH UPDATES WITH THIS FILE
+
+
 MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
 """
