@@ -3,9 +3,9 @@ MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
 
 Items Left:
-    1. State Logic Implementation
-    2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)
-    3. Warning/Error Messages on GUI
+    1. State Logic Implementation 
+    2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)            - Austin
+    3. Warning/Error Messages on GUI 
     4. Compare to Requirements Document
     5. Organize Variables, Functions, and Code Flow
 
@@ -26,24 +26,26 @@ window.configure(background = 'light gray')
 
 global Dispense_State; Dispense_State = "Off"
 global Inlet_State; Inlet_State = tk.StringVar(window,"1") #tkinter string to store radio button variable
-global current_height; current_height = 50.0
+global current_height; current_height = 50.0               #dynamically changing based on inlet and outlet flow
 global Start_Time1
 global Start_Time2
-
 
 radio_values = {"Off"  : "1",
                 "On"   : "2",
                 "Auto" : "3"}  #radio button index
 
 flag = " "
-height = 50.0
-Control_Mode = "Off"
 
+height = tk.DoubleVar()                         #variable set by user as target by scale 
+height.set(50.0)                                #setting initial scale to 50.0
+scale_height = 50.0                             #setting initial text to 50.0
+
+
+Control_Mode = "Off"
 State = " "
 Next_State = "InletOffDispenseOff"
 Start_Time1 = 0
 Start_Time2 = 0
-
 
 # --- GUI Functions --- #
 
@@ -64,9 +66,14 @@ def retrieve(Widget, x, y):
 def Get_Time_Now():
     return(time.perf_counter())
 
-def Get_Tank_Height():
-    height = Height_Scalar.get()
-    print('Scale ht.' + str(height))
+def Get_Tank_Height():                                          #function called by confirm button
+   if(Start == True):                                           #checks if start button has been pushed
+        scale_height = height.get()                             #saves scale value (height.get()) as scale_height for label
+        print('Scale ht:' + str(scale_height))                  #prints output
+        Desired_Height1.config(text = scale_height)             #configures label with updated value
+        window.update()                                         #updates window (optional?)
+   else:
+       pass
 
 def Dispense(Dispense_Button):
     if (Start == True):
@@ -233,6 +240,11 @@ Dispense_on.place(x = 200, y = 15)
 Dispense_off = tk.Button(text='Dispense: Off', command = lambda: Dispense("Off"))
 Dispense_off.place(x = 300, y = 15)
 
+# --- GUI Scale Button --- #
+
+Scale_Button = tk.Button(text='Confirm Height', command = lambda: Get_Tank_Height())   #confirm height button to set scale value as target
+Scale_Button.place(x = 450, y = 260)
+
 # --- GUI Control Labels --- #
 
 Control_label = tk.Label(text= "Control Mode", width = 15)
@@ -268,7 +280,7 @@ Control_label1.place(x = 350, y = 80)
 Tank_Height1 = tk.Label(text= current_height, width = 5)
 Tank_Height1.place(x = 350, y = 120)
 
-Desired_Height1 = tk.Label(text= height, width = 5)
+Desired_Height1 = tk.Label(text= scale_height, width = 5)
 Desired_Height1.place(x = 350, y = 160)
 
 Dispense_Mode1 = tk.Label(text= Dispense_State, width = 5)
@@ -283,12 +295,12 @@ for (text, value) in radio_values.items():
     print('this is from radio button ' + str(Inlet_State.get()))
 
 
+
 # Slider Widget to set height
-
-Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical')
-Height_Scalar.place(x = 475, y = 140)
-Height_Scalar.set(50.0)
+Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') #setup scale
+Height_Scalar.place(x = 475, y = 140)                                                                            #place scale
 
 
-
+#window.after(1000, Get_Tank_Height(Height_Scalar.get()))
 window.mainloop()
+
