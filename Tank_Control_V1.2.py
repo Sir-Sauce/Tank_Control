@@ -9,14 +9,14 @@ import tkinter as tk
 
 # --- GUI Window Creation --- #
 
-window = tk.Tk()                                #initialize tkinter GUI 
-window.title("Tank Control GUI")           
+window = tk.Tk()                                #initialize tkinter GUI
+window.title("Tank Control GUI")
 window.geometry('600x300')                      #Sets application window size
 window.configure(background = 'light gray')
 
 # --- Variables --- #
 
-global Dispense_State; Dispense_State = "Off" 
+global Dispense_State; Dispense_State = "Off"
 
 
 
@@ -38,10 +38,10 @@ global Dispense_State; Dispense_State = "Off"
 
 global Inlet_State; Inlet_State = '0'
 # the way in which the variable is used may need changed for the radio loop
-# Inlet_State = StrVar() 
-radio_values = {"Off"  : "1",
-                "On"   : "2",
-                "Auto" : "3"}  #radio button index
+# Inlet_State = StrVar()
+radio_values = {"Off"  : "0",
+                "On"   : "1",
+                "Auto" : "2"}  #radio button index
 
 ############# END OF RELEVANT RADIO BUTTON STUFF ############
 
@@ -64,10 +64,12 @@ radio_values = {"Off"  : "1",
 
 
 global current_height; current_height = 50.0
-global Start_Time1; 
-global Start_Time2; 
-global State_1_Interval; State_1_Interval = 2
-global State_2_Interval; State_2_Interval = 0.5
+global Start_Time1;
+global Start_Time2;
+
+#not needed
+# global State_1_Interval; State_1_Interval = 2
+# global State_2_Interval; State_2_Interval = 0.5
 
 
 flag = " "
@@ -86,41 +88,41 @@ Start_Time2 = 0
 
 def Exitf():
     window.destroy()
-    
+
 def forget(Widget):
     Widget.place_forget()
-    
+
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
-    
-   
-    
-   
-# --- Aux - State Functions --- # 
-    
+
+
+
+
+# --- Aux - State Functions --- #
+
 def Get_Time_Now():
     return(time.perf_counter())
 
-def Get_Tank_Height(): 
+def Get_Tank_Height():
     height = Height_Scalar.get()
     print('Scale ht.' + str(height))
 
 def Dispense(Dispense_Button):
     if (Start == True):
-        
+
         if (Dispense_Button == "On"):
             forget(Dispense_on); retrieve(Dispense_off, 300, 15)
             print('dispense on')
             Dispense_State = 'On'; return Dispense_State
             Dispense_On = True
-        
-        else: 
-            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
+
+        else:
+            forget(Dispense_off); retrieve(Dispense_on, 200, 15)
             print('dispense off')
             Dispense_State = 'Off'; return Dispense_State
             Dispense_On = False
         return Dispense_On
-        Dispense_Mode1.config(text = Dispense_State) 
+        Dispense_Mode1.config(text = Dispense_State)
 
 
 
@@ -148,7 +150,7 @@ def Dispense(Dispense_Button):
 ######## --- RADIO BUTTON FUNCTION --- ###########
 
 def Inlet_State_Status(Inlet_State):
-        global Inlet_Op; Inlet_Op = 'Off' 
+        global Inlet_Op; Inlet_Op = 'Off'
         print('inlet state statues:  ' + str(Inlet_State))
         if Inlet_State == 0:
             Inlet_Op = 'Off'
@@ -157,47 +159,47 @@ def Inlet_State_Status(Inlet_State):
         elif Inlet_State == 2:
             Inlet_Op = 'Auto'
         print('inlet op: ' + str(Inlet_Op))
-        return Inlet_Op   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        return Inlet_Op
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def Warning_Status():
-    
+
     if (height >= 95.0):                        #set warning labels (high)
         flag = "Warning: High Tank Level"
         print('tank level high')
-    
+
     elif (height <= 20.0):                      #set warning labels (low)
         flag = "Warning: Low Tank Level"
         print('tank level low')
-    
+
     else:
         flag = " "                              #set warning labels (none)
         print("Warning: Tank Level nominal")
-    Warnings.config(text = flag)    
+    Warnings.config(text = flag)
 
 
 
@@ -216,8 +218,8 @@ def Start():
         ####### THIS IS WHERE STATE FUNCTIONS WILL GO ###########
             ### Control_Task()
             ###
-        
-    
+
+
     print('start button')
 
 
@@ -225,56 +227,56 @@ def Start():
 ### --- This is still in progress
 # def Control_Task():
 #     State = Next_State
-    
+
 #     if (Get_Time_Now() - Start_Time1) >= 1:
-        
+
 #         if State == "InletOffDispenseOff":
-            
-            
-            
+
+
+
             # if operation = on OR = auto & ht >= input ht. - 0.5
                 #inlet on = true
             # else
                 #inlet on = false
-            
+
             # if dispense on = true & inlet on = true
                 # Next State =  InletOnDispenseOn
-            
+
             # elif inlet on = true
                 # Next State = InletOnDispenseOff
-            
+
             # elif dispense on = true
                 # Next state = InletOffDispenseOn
-                
+
             # if state = InletOnDispenseOff OR InletOnDispenseOn
                 # if operation = off OR operation = Auto & ht < input ht - 0.5
                     # if state = InletOnDispenseOff
                         # Next State = InletOffDispenseOff
-                    # else 
+                    # else
                         # Next State = InletOffDispenseOn
-    
-            
-        
+
+
+
 
 #### --- This will be replaced with Control Function --- ###
-# def Inlet_State_Logic(Inlet_State):             
+# def Inlet_State_Logic(Inlet_State):
 #     global Active_Inlet_State
 #     if(Start == True):
-#         #Pre-process 
+#         #Pre-process
 #         print("executing state logic")
 #         print(Inlet_State)
-        
+
 #         #Inlet status
 #         if(Inlet_State == 1):                       #inlet closed
 #             Active_Inlet_State = 1
 #             Control_Mode = "Off"
 #             print("off-inlet closed" + str(Active_Inlet_State))
-                    
+
 #         elif(Inlet_State == 2):                     #inlet open
 #             Active_Inlet_State = 2
 #             Control_Mode = "On"
 #             print("on-inlet open" + str(Active_Inlet_State))
-        
+
 #         elif(Inlet_State == 3):
 #             Control_Mode = "Auto"
 #             print("Auto mode")
@@ -289,7 +291,7 @@ def Start():
 #         return Active_Inlet_State; return Control_Mode
 
 #     else:
-#         Active_Inlet_State = 0 
+#         Active_Inlet_State = 0
 #         return Active_Inlet_State
 #         print("Not Started")
 
@@ -297,7 +299,7 @@ def Start():
 
 
 # --- GUI Buttons --- #
-   
+
 Exit_Button = tk.Button(text='Exit', command = Exitf)
 Exit_Button.place(x = 20, y = 20)
 
@@ -374,8 +376,8 @@ Dispense_Mode1.place(x = 350, y = 200)
 
 #establish radio button layout
 
-for (text, value) in radio_values.items(): 
-    tk.Radiobutton(window, text = text, variable = Inlet_State,            
+for (text, value) in radio_values.items():
+    tk.Radiobutton(window, text = text, variable = Inlet_State,
     value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State)).place(x = 20, y = 120+int(value)*20)
     print('this is from radio button' + str(Inlet_State))
 
@@ -406,41 +408,10 @@ for (text, value) in radio_values.items():
 
 # Slider Widget to set height
 
-Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') 
+Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical')
 Height_Scalar.place(x = 475, y = 140)
 Height_Scalar.set(50.0)
 
 
 
 window.mainloop()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
