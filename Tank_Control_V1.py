@@ -237,34 +237,3 @@ while(2>1):
         
     Start_Time = time.time()
     window.mainloop()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
