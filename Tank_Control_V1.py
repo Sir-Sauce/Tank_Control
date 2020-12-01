@@ -53,7 +53,6 @@ def Get_Tank_Height():
     height = Height_Scalar.get()
     print('Scale ht.' + str(height))
 
-
 ########## Dispense and Inlet need to operate from timer functions
 ########## Must store a start time, store button on time, at each interval do something
 ########## Perform while loop, with embedded timer functions to do above
