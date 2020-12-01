@@ -36,12 +36,15 @@ global Dispense_State; Dispense_State = "Off"
 
 ############### HERE IS THE RADIO VARIABLE ##################
 
-global Inlet_State; Inlet_State = '0'
+#tkinter string to store radio button variable
+
+global Inlet_State; Inlet_State = tk.StringVar(window,"1")
 # the way in which the variable is used may need changed for the radio loop
 # Inlet_State = StrVar()
-radio_values = {"Off"  : "0",
-                "On"   : "1",
-                "Auto" : "2"}  #radio button index
+
+radio_values = {"Off"  : "1",
+                "On"   : "2",
+                "Auto" : "3"}  #radio button index
 
 ############# END OF RELEVANT RADIO BUTTON STUFF ############
 
@@ -64,8 +67,8 @@ radio_values = {"Off"  : "0",
 
 
 global current_height; current_height = 50.0
-global Start_Time1;
-global Start_Time2;
+global Start_Time1
+global Start_Time2
 
 #not needed
 # global State_1_Interval; State_1_Interval = 2
@@ -81,6 +84,7 @@ Next_State = "InletOffDispenseOff"
 Start_Time1 = 0
 Start_Time2 = 0
 
+#value = StringVar(window, "1")
 
 
 
@@ -113,16 +117,19 @@ def Dispense(Dispense_Button):
         if (Dispense_Button == "On"):
             forget(Dispense_on); retrieve(Dispense_off, 300, 15)
             print('dispense on')
-            Dispense_State = 'On'; return Dispense_State
+            Dispense_State = 'On'; #return Dispense_State
             Dispense_On = True
 
         else:
             forget(Dispense_off); retrieve(Dispense_on, 200, 15)
             print('dispense off')
-            Dispense_State = 'Off'; return Dispense_State
+            Dispense_State = 'Off'; #return Dispense_State
             Dispense_On = False
-        return Dispense_On
+
+        #return Dispense_On
         Dispense_Mode1.config(text = Dispense_State)
+    else:
+        pass
 
 
 
@@ -150,16 +157,20 @@ def Dispense(Dispense_Button):
 ######## --- RADIO BUTTON FUNCTION --- ###########
 
 def Inlet_State_Status(Inlet_State):
+    if(Start == True):
         global Inlet_Op; Inlet_Op = 'Off'
         print('inlet state statues:  ' + str(Inlet_State))
-        if Inlet_State == 0:
+        if Inlet_State == '1':
             Inlet_Op = 'Off'
-        elif  Inlet_State == 1:
+        elif  Inlet_State == '2':
             Inlet_Op = 'On'
-        elif Inlet_State == 2:
+        elif Inlet_State == '3':
             Inlet_Op = 'Auto'
-        print('inlet op: ' + str(Inlet_Op))
+        print('inlet op: ' + Inlet_Op)
+        Control_label1.config(text = Inlet_Op)
         return Inlet_Op
+    else:
+        pass
 
 
 
@@ -213,8 +224,8 @@ def Start():
     global Start_Time1; Start_Time1 = Get_Time_Now()
     global Start_Time2; Start_Time2 = Get_Time_Now()
     Start_Button.place_forget()
-    while (2>1):
-        window.update()
+    #while (2>1):
+        #window.update()
         ####### THIS IS WHERE STATE FUNCTIONS WILL GO ###########
             ### Control_Task()
             ###
@@ -378,9 +389,8 @@ Dispense_Mode1.place(x = 350, y = 200)
 
 for (text, value) in radio_values.items():
     tk.Radiobutton(window, text = text, variable = Inlet_State,
-    value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State)).place(x = 20, y = 120+int(value)*20)
-    print('this is from radio button' + str(Inlet_State))
-
+    value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State.get()) ).place(x = 20, y = 120+int(value)*20)
+    print('this is from radio button ' + str(Inlet_State.get()))
 
 ########## --- END OF RADIO BUTTON --- ##############
 
