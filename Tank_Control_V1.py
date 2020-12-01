@@ -17,48 +17,179 @@ window.configure(background = 'light gray')
 # --- Variables --- #
 
 global Dispense_State; Dispense_State = "Off" 
-global Inlet_State; Inlet_State = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############### HERE IS THE RADIO VARIABLE ##################
+
+global Inlet_State; Inlet_State = '0'
+# the way in which the variable is used may need changed for the radio loop
+# Inlet_State = StrVar() 
+radio_values = {"Off"  : "1",
+                "On"   : "2",
+                "Auto" : "3"}  #radio button index
+
+############# END OF RELEVANT RADIO BUTTON STUFF ############
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 global current_height; current_height = 50.0
-global Start_Time; Start_Time = time.time()
+global Start_Time1; 
+global Start_Time2; 
 global State_1_Interval; State_1_Interval = 2
 global State_2_Interval; State_2_Interval = 0.5
 
-radio_values = {"Off" : "1", "On" : "2", "Auto" : "3"}  #radio button index
+
 flag = " "
 height = 50.0
 Control_Mode = "Off"
 
-print( "start time: " + str(Start_Time))
+State = " "
+Next_State = "InletOffDispenseOff"
+Start_Time1 = 0
+Start_Time2 = 0
+
+
 
 
 # --- GUI Functions --- #
 
 def Exitf():
     window.destroy()
-
-def Start():
-    global Start; Start = True
-    Start_Button.place_forget()
-    time.sleep(0.1)
-    print('start button')
-
+    
 def forget(Widget):
     Widget.place_forget()
     
 def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
     
-def Get_Tank_Height(): 
+   
     
+   
+# --- Aux - State Functions --- # 
+    
+def Get_Time_Now():
+    return(time.perf_counter())
+
+def Get_Tank_Height(): 
     height = Height_Scalar.get()
     print('Scale ht.' + str(height))
 
+<<<<<<< HEAD
 ########## Dispense and Inlet need to operate from timer functions
 ########## Must store a start time, store button on time, at each interval do something
 ########## Perform while loop, with embedded timer functions to do above
+=======
+def Dispense(Dispense_Button):
+    if (Start == True):
+        
+        if (Dispense_Button == "On"):
+            forget(Dispense_on); retrieve(Dispense_off, 300, 15)
+            print('dispense on')
+            Dispense_State = 'On'; return Dispense_State
+            Dispense_On = True
+        
+        else: 
+            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
+            print('dispense off')
+            Dispense_State = 'Off'; return Dispense_State
+            Dispense_On = False
+        return Dispense_On
+        Dispense_Mode1.config(text = Dispense_State) 
 
-# --- State Functions --- #
 
+
+
+
+
+
+
+
+
+>>>>>>> 8a6ae2a76bb04a98cbc840e128f0f748a79198c5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######## --- RADIO BUTTON FUNCTION --- ###########
+
+def Inlet_State_Status(Inlet_State):
+        global Inlet_Op; Inlet_Op = 'Off' 
+        print('inlet state statues:  ' + str(Inlet_State))
+        if Inlet_State == 0:
+            Inlet_Op = 'Off'
+        elif  Inlet_State == 1:
+            Inlet_Op = 'On'
+        elif Inlet_State == 2:
+            Inlet_Op = 'Auto'
+        print('inlet op: ' + str(Inlet_Op))
+        return Inlet_Op   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 def Warning_Status():
     
     if (height >= 95.0):                        #set warning labels (high)
@@ -72,66 +203,103 @@ def Warning_Status():
     else:
         flag = " "                              #set warning labels (none)
         print("Warning: Tank Level nominal")
-    Warnings.config(text = flag)
+    Warnings.config(text = flag)    
+
+
+
 
 
 # --- State Logic --- #
 
-def Dispense(Dispense_Button):
-    global Dispense_State
-    global Dispense_Mode
-    if (Start == True):
-        
-        if (Dispense_Button == "On"):
-            forget(Dispense_on); retrieve(Dispense_off, 300, 15)
-            print('dispense on')
-            Dispense_State = 'On'; return Dispense_State
-            window.update()
-        
-        else: 
-            forget(Dispense_off); retrieve(Dispense_on, 200, 15)  
-            print('dispense off')
-            Dispense_State = 'Off'; return Dispense_State
-            window.update()
 
-        Dispense_Mode1.config(text = Dispense_State) #must be moved to before the dispense function is called to prevent delay
+def Start():
+    global Start; Start = True
+    global Start_Time1; Start_Time1 = Get_Time_Now()
+    global Start_Time2; Start_Time2 = Get_Time_Now()
+    Start_Button.place_forget()
+    while (2>1):
+        window.update()
+        ####### THIS IS WHERE STATE FUNCTIONS WILL GO ###########
+            ### Control_Task()
+            ###
+        
+    
+    print('start button')
 
 
-def Inlet_State_Logic(Inlet_State):             
-    global Active_Inlet_State
-    if(Start == True):
-        #Pre-process 
-        print("executing state logic")
-        print(Inlet_State)
+### --- This is the new Control Function for State Org. --- ###
+### --- This is still in progress
+# def Control_Task():
+#     State = Next_State
+    
+#     if (Get_Time_Now() - Start_Time1) >= 1:
         
-        #Inlet status
-        if(Inlet_State == 1):                       #inlet closed
-            Active_Inlet_State = 1
-            Control_Mode = "Off"
-            print("off-inlet closed" + str(Active_Inlet_State))
+#         if State == "InletOffDispenseOff":
+            
+            
+            
+            # if operation = on OR = auto & ht >= input ht. - 0.5
+                #inlet on = true
+            # else
+                #inlet on = false
+            
+            # if dispense on = true & inlet on = true
+                # Next State =  InletOnDispenseOn
+            
+            # elif inlet on = true
+                # Next State = InletOnDispenseOff
+            
+            # elif dispense on = true
+                # Next state = InletOffDispenseOn
+                
+            # if state = InletOnDispenseOff OR InletOnDispenseOn
+                # if operation = off OR operation = Auto & ht < input ht - 0.5
+                    # if state = InletOnDispenseOff
+                        # Next State = InletOffDispenseOff
+                    # else 
+                        # Next State = InletOffDispenseOn
+    
+            
+        
+
+#### --- This will be replaced with Control Function --- ###
+# def Inlet_State_Logic(Inlet_State):             
+#     global Active_Inlet_State
+#     if(Start == True):
+#         #Pre-process 
+#         print("executing state logic")
+#         print(Inlet_State)
+        
+#         #Inlet status
+#         if(Inlet_State == 1):                       #inlet closed
+#             Active_Inlet_State = 1
+#             Control_Mode = "Off"
+#             print("off-inlet closed" + str(Active_Inlet_State))
                     
-        elif(Inlet_State == 2):                     #inlet open
-            Active_Inlet_State = 2
-            Control_Mode = "On"
-            print("on-inlet open" + str(Active_Inlet_State))
+#         elif(Inlet_State == 2):                     #inlet open
+#             Active_Inlet_State = 2
+#             Control_Mode = "On"
+#             print("on-inlet open" + str(Active_Inlet_State))
         
-        elif(Inlet_State == 3):
-            Control_Mode = "Auto"
-            print("Auto mode")
-            if(current_height <= (height - 0.5)):   #inlet auto mode
-                Active_Inlet_State = 2
-                print("auto-inlet open" + str(Active_Inlet_State))
-            else:
-                Active_Inlet_State = 1
-                print("auto-inlet closed" + str(Active_Inlet_State))
-        else:
-            pass
-        return Active_Inlet_State; return Control_Mode
+#         elif(Inlet_State == 3):
+#             Control_Mode = "Auto"
+#             print("Auto mode")
+#             if(current_height <= (height - 0.5)):   #inlet auto mode
+#                 Active_Inlet_State = 2
+#                 print("auto-inlet open" + str(Active_Inlet_State))
+#             else:
+#                 Active_Inlet_State = 1
+#                 print("auto-inlet closed" + str(Active_Inlet_State))
+#         else:
+#             pass
+#         return Active_Inlet_State; return Control_Mode
 
-    else:
-        Active_Inlet_State = 0 
-        return Active_Inlet_State
-        print("Not Started")
+#     else:
+#         Active_Inlet_State = 0 
+#         return Active_Inlet_State
+#         print("Not Started")
+
+
 
 
 # --- GUI Buttons --- #
@@ -189,22 +357,68 @@ Desired_Height1.place(x = 350, y = 160)
 Dispense_Mode1 = tk.Label(text= Dispense_State, width = 5)
 Dispense_Mode1.place(x = 350, y = 200)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########## --- RADIO BUTTON --- ##############
+
+#establish radio button layout
+
+for (text, value) in radio_values.items(): 
+    tk.Radiobutton(window, text = text, variable = Inlet_State,            
+    value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State)).place(x = 20, y = 120+int(value)*20)
+    print('this is from radio button' + str(Inlet_State))
+
+
+########## --- END OF RADIO BUTTON --- ##############
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Slider Widget to set height
 
 Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') 
 Height_Scalar.place(x = 475, y = 140)
 Height_Scalar.set(50.0)
 
-#establish radio button layout
-def Radio_Button():
-    for (text, value) in radio_values.items(): 
-        tk.Radiobutton(window, text = text, variable = Inlet_State,            
-        value = value, width = 10, command = lambda: Inlet_State_Logic(Inlet_State)).place(x = 20, y = 120+int(value)*20)
-        print('this is from radio button' + str(Inlet_State))
 
 
-# --- Begin GUI Mainloop --- #    
-
+<<<<<<< HEAD
     
 ############ Timer tasks to update states
 while(2>1):
@@ -236,3 +450,37 @@ while(2>1):
         
     Start_Time = time.time()
     window.mainloop()
+=======
+window.mainloop()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+>>>>>>> 8a6ae2a76bb04a98cbc840e128f0f748a79198c5
