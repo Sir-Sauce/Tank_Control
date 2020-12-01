@@ -1,6 +1,14 @@
 """
 MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
+
+Items Left:
+    1. State Logic Implementation
+    2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)
+    3. Warning/Error Messages on GUI
+    4. Compare to Requirements Document
+    5. Organize Variables, Functions, and Code Flow
+
 """
 # --- Libraries Used --- #
 
@@ -17,63 +25,15 @@ window.configure(background = 'light gray')
 # --- Variables --- #
 
 global Dispense_State; Dispense_State = "Off"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-############### HERE IS THE RADIO VARIABLE ##################
-
-#tkinter string to store radio button variable
-
-global Inlet_State; Inlet_State = tk.StringVar(window,"1")
-# the way in which the variable is used may need changed for the radio loop
-# Inlet_State = StrVar()
-
-radio_values = {"Off"  : "1",
-                "On"   : "2",
-                "Auto" : "3"}  #radio button index
-
-############# END OF RELEVANT RADIO BUTTON STUFF ############
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+global Inlet_State; Inlet_State = tk.StringVar(window,"1") #tkinter string to store radio button variable
 global current_height; current_height = 50.0
 global Start_Time1
 global Start_Time2
 
-#not needed
-# global State_1_Interval; State_1_Interval = 2
-# global State_2_Interval; State_2_Interval = 0.5
 
+radio_values = {"Off"  : "1",
+                "On"   : "2",
+                "Auto" : "3"}  #radio button index
 
 flag = " "
 height = 50.0
@@ -83,9 +43,6 @@ State = " "
 Next_State = "InletOffDispenseOff"
 Start_Time1 = 0
 Start_Time2 = 0
-
-#value = StringVar(window, "1")
-
 
 
 # --- GUI Functions --- #
@@ -133,29 +90,6 @@ def Dispense(Dispense_Button):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-######## --- RADIO BUTTON FUNCTION --- ###########
-
 def Inlet_State_Status(Inlet_State):
     if(Start == True):
         global Inlet_Op; Inlet_Op = 'Off'
@@ -174,29 +108,6 @@ def Inlet_State_Status(Inlet_State):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def Warning_Status():
 
     if (height >= 95.0):                        #set warning labels (high)
@@ -211,7 +122,6 @@ def Warning_Status():
         flag = " "                              #set warning labels (none)
         print("Warning: Tank Level nominal")
     Warnings.config(text = flag)
-
 
 
 
@@ -365,55 +275,12 @@ Dispense_Mode1 = tk.Label(text= Dispense_State, width = 5)
 Dispense_Mode1.place(x = 350, y = 200)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-########## --- RADIO BUTTON --- ##############
-
 #establish radio button layout
 
 for (text, value) in radio_values.items():
     tk.Radiobutton(window, text = text, variable = Inlet_State,
     value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State.get()) ).place(x = 20, y = 120+int(value)*20)
     print('this is from radio button ' + str(Inlet_State.get()))
-
-########## --- END OF RADIO BUTTON --- ##############
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Slider Widget to set height
