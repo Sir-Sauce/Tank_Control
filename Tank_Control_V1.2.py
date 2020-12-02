@@ -2,12 +2,17 @@
 MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
 
-Items Left:
-    1. State Logic Implementation 
+Big Items Left:
+    1. State Logic Implementation  - Matt
     2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)            - Austin
-    3. Warning/Error Messages on GUI 
+    3. Warning/Error Messages on GUI - Matt
     4. Compare to Requirements Document
     5. Organize Variables, Functions, and Code Flow
+
+Small Refinement Items Left:
+    1. Tank can overfill past 100cm (Should it be a hard limit of 100?)
+    2. Tank increments in factors of a second (Should it be smaller)
+    3. Remove Confirm Height button anad corresponding logic
 
 """
 # --- Libraries Used --- #
@@ -126,12 +131,11 @@ def Inlet_State_Status(Inlet_State):
 
 
 def Warning_Status():
-
-    if (height >= 95.0):                        #set warning labels (high)
+    if (current_height >= 95.0):                        #set warning labels (high)
         flag = "Warning: High Tank Level"
         print('tank level high')
 
-    elif (height <= 20.0):                      #set warning labels (low)
+    elif (current_height <= 20.0):                      #set warning labels (low)
         flag = "Warning: Low Tank Level"
         print('tank level low')
 
@@ -199,7 +203,7 @@ def Control_Task():
             
         if State1 == 'InletOn':
             
-            if Inlet_Op == 'Off':
+            if Inlet_Op == 'Off' or current_height >= 100:
                 Next_State1 = "InletOff"
             
             elif Delay_Over == True:
@@ -218,12 +222,13 @@ def Control_Task():
                 
         if State2 == 'DispenseOn':
             
-            if Dispense_On == False:
+            if Dispense_On == False or current_height <= 0:
                 Next_State2 = 'DispenseOff'
             
             elif Delay_Over == True:
                 current_height -= 0.5
 
+    Warning_Status()
     Tank_Height1.config(text = current_height)
     print(current_height)
                 
