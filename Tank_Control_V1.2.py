@@ -173,7 +173,9 @@ def Control_Task():
     global Next_State2
     global current_height
     global height
-
+    global scale_height
+    
+    scale_height = height.get()
     
     State1 = Next_State1
     State2 = Next_State2
@@ -182,16 +184,18 @@ def Control_Task():
     
     Get_Tank_Height()
     
-    print(Get_Time_Now())
-    print(Start_Time1)
+    print(Inlet_Op)
+    print(scale_height)
      
     if (Get_Time_Now() - Start_Time1) >= 1:
         Delay_Over = True
         Start_Time1 = Get_Time_Now()
+        
         if State1 == "InletOff": 
             
             if ((Inlet_Op =='On') or (Inlet_Op == 'Auto' and (current_height <= scale_height - 0.5))):
                 Next_State1 = 'InletOn'
+                
             
         if State1 == 'InletOn':
             
@@ -199,9 +203,15 @@ def Control_Task():
                 Next_State1 = "InletOff"
             
             elif Delay_Over == True:
-                current_height += 2
+                
+                if (Inlet_Op == 'Auto' and current_height >= scale_height - 0.5):
+                    Next_State1 = 'InletOff'
+                    
+                else:
+                    current_height += 2
             
         if State2 =="DispenseOff":
+            
             if Dispense_On == True:
                 Next_State2 = 'DispenseOn'
                 print('THIS IS NOW ON YOO')
@@ -215,53 +225,10 @@ def Control_Task():
                 current_height -= 0.5
 
     Tank_Height1.config(text = current_height)
-    #height.set(current_height)
     print(current_height)
                 
                 
             
-
-
-
-#### --- This will be replaced with Control Function --- ###
-# def Inlet_State_Logic(Inlet_State):
-#     global Active_Inlet_State
-#     if(Start == True):
-#         #Pre-process
-#         print("executing state logic")
-#         print(Inlet_State)
-
-#         #Inlet status
-#         if(Inlet_State == 1):                       #inlet closed
-#             Active_Inlet_State = 1
-#             Control_Mode = "Off"
-#             print("off-inlet closed" + str(Active_Inlet_State))
-
-#         elif(Inlet_State == 2):                     #inlet open
-#             Active_Inlet_State = 2
-#             Control_Mode = "On"
-#             print("on-inlet open" + str(Active_Inlet_State))
-
-#         elif(Inlet_State == 3):
-#             Control_Mode = "Auto"
-#             print("Auto mode")
-#             if(current_height <= (height - 0.5)):   #inlet auto mode
-#                 Active_Inlet_State = 2
-#                 print("auto-inlet open" + str(Active_Inlet_State))
-#             else:
-#                 Active_Inlet_State = 1
-#                 print("auto-inlet closed" + str(Active_Inlet_State))
-#         else:
-#             pass
-#         return Active_Inlet_State; return Control_Mode
-
-#     else:
-#         Active_Inlet_State = 0
-#         return Active_Inlet_State
-#         print("Not Started")
-
-
-
 
 # --- GUI Buttons --- #
 
@@ -338,6 +305,6 @@ Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 1
 Height_Scalar.place(x = 475, y = 140)                                                                            #place scale
 
 
-window.after(10, forget(Dispense_off))              #to forget initial dispense_off widget button thing 
+window.after(10, forget(Dispense_off))              #Forget initial dispense_off widget button 
 window.mainloop()
 
