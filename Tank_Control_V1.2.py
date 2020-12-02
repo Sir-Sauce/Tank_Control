@@ -54,7 +54,7 @@ Next_State2 = "DispenseOff"
 Start_Time1 = 0
 Start_Time2 = 0
 
-Inlet_Op = 'Off'
+Inlet_Op = 'Off'                                #radio button variable to track inlet valve
 Dispense_On = False
 
 # --- GUI Functions --- #
@@ -190,7 +190,7 @@ def Control_Task():
         Start_Time1 = Get_Time_Now()
         if State1 == "InletOff": 
             
-            if ((Inlet_Op =='On') or (Inlet_Op == 'Auto' and (current_height >= scale_height - 0.5))):
+            if ((Inlet_Op =='On') or (Inlet_Op == 'Auto' and (current_height <= scale_height - 0.5))):
                 Next_State1 = 'InletOn'
             
         if State1 == 'InletOn':
@@ -214,7 +214,8 @@ def Control_Task():
             elif Delay_Over == True:
                 current_height -= 0.5
 
-    height.set(current_height)
+    Tank_Height1.config(text = current_height)
+    #height.set(current_height)
     print(current_height)
                 
                 
@@ -337,6 +338,6 @@ Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 1
 Height_Scalar.place(x = 475, y = 140)                                                                            #place scale
 
 
-#window.after(1000, Get_Tank_Height(Height_Scalar.get()))
+window.after(10, forget(Dispense_off))              #to forget initial dispense_off widget button thing 
 window.mainloop()
 
