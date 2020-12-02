@@ -33,17 +33,6 @@ window.configure(background = 'light gray')     # Set background of window
 
 ### --- Variables --- ###
 
-
-# global Dispense_State; 
-# global Inlet_State;  
-# global current_height;                
-# global Start_Time1
-# global State1
-# global State2
-# global Next_State1
-# global Next_State2
-# global height
-
 radio_values = {"Off"  : "1",
                 "On"   : "2",
                 "Auto" : "3"}                   # Radio Button Index
@@ -207,7 +196,7 @@ def Control_Task():
             elif Delay_Over == True:    
                 
             
-                if (Inlet_Op == 'Auto' and current_height >= scale_height - 0.5):
+                if (Inlet_Op == 'Auto' and current_height > scale_height - 0.5):   #should be > not >= (inlet valve open at scale_height -0.5cm)
                     Next_State1 = 'InletOff'        
                             
                 else:
@@ -215,7 +204,7 @@ def Control_Task():
                     
                     if(current_height > 100.0):              #sets upper bound to prevent tank from filling past 100.0cm
                         current_height = 100.0
-                    
+    
             
         if State2 =="DispenseOff":
             
@@ -229,8 +218,18 @@ def Control_Task():
             if Dispense_On == False or current_height == 0: #Sets lower bound to prevent tank from emptying below 0.0cm
                 Next_State2 = 'DispenseOff'
             
-            elif Delay_Over == True:
-                current_height -= 0.5
+            elif Delay_Over == True:   
+                #current_height -= 0.5             
+
+###################
+
+                if (Inlet_Op == "Auto" and current_height <= scale_height - 0.5): #flag to make inlet op increment exactly at scale_height - 0.5
+                    Next_State1 = "InletOn"
+                else:
+                    current_height -= 0.5
+
+#######################
+                    
 
     Warning_Status()
     Tank_Height1.config(text = current_height)
@@ -313,6 +312,8 @@ for (text, value) in radio_values.items():
 Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') #setup scale
 Height_Scalar.place(x = 475, y = 140)                                                                            #place scale
 
+
+#Begin Mainloop to generate window
 
 window.after(10, forget(Dispense_off))              #Forget initial dispense_off widget button 
 window.mainloop()
