@@ -33,6 +33,7 @@ global State1
 global State2
 global Next_State1
 global Next_State2
+global height
 
 radio_values = {"Off"  : "1",
                 "On"   : "2",
@@ -84,6 +85,7 @@ def Get_Tank_Height():                                          #function called
        pass
 
 def Dispense(Dispense_Button):
+    global Dispense_On
     if (Start == True):
 
         if (Dispense_Button == "On"):
@@ -98,9 +100,7 @@ def Dispense(Dispense_Button):
             Dispense_State = 'Off'; 
             Dispense_On = False
 
-        
         Dispense_Mode1.config(text = Dispense_State)
-        return Dispense_On
     
     else:
         pass
@@ -152,6 +152,7 @@ def Start():
     global Start_Time2; Start_Time2 = Get_Time_Now()
     Start_Button.place_forget()
     while (2>1):
+        time.sleep(0.1)
         window.update()
         Control_Task()
 
@@ -171,31 +172,50 @@ def Control_Task():
     global Next_State1
     global Next_State2
     global current_height
+    global height
 
     
     State1 = Next_State1
     State2 = Next_State2
     
+    print(State1 + State2)
+    
     Get_Tank_Height()
+    
+    print(Get_Time_Now())
+    print(Start_Time1)
      
     if (Get_Time_Now() - Start_Time1) >= 1:
         Delay_Over = True
-               
+        Start_Time1 = Get_Time_Now()
         if State1 == "InletOff": 
+            
             if ((Inlet_Op =='On') or (Inlet_Op == 'Auto' and (current_height >= scale_height - 0.5))):
                 Next_State1 = 'InletOn'
             
         if State1 == 'InletOn':
-            if Delay_Over == True:
+            
+            if Inlet_Op == 'Off':
+                Next_State1 = "InletOff"
+            
+            elif Delay_Over == True:
                 current_height += 2
             
         if State2 =="DispenseOff":
             if Dispense_On == True:
                 Next_State2 = 'DispenseOn'
+                print('THIS IS NOW ON YOO')
                 
         if State2 == 'DispenseOn':
-            if Delay_Over == True:
+            
+            if Dispense_On == False:
+                Next_State2 = 'DispenseOff'
+            
+            elif Delay_Over == True:
                 current_height -= 0.5
+
+    height.set(current_height)
+    print(current_height)
                 
                 
             
