@@ -29,6 +29,10 @@ global Inlet_State; Inlet_State = tk.StringVar(window,"1") #tkinter string to st
 global current_height; current_height = 50.0               #dynamically changing based on inlet and outlet flow
 global Start_Time1
 global Start_Time2
+global State1
+global State2
+global Next_State1
+global Next_State2
 
 radio_values = {"Off"  : "1",
                 "On"   : "2",
@@ -42,10 +46,15 @@ scale_height = 50.0                             #setting initial text to 50.0
 
 
 Control_Mode = "Off"
-State = " "
-Next_State = "InletOffDispenseOff"
+State1 = " "
+State2 = " "
+Next_State1 = "InletOff"
+Next_State2 = "DispenseOff"
 Start_Time1 = 0
 Start_Time2 = 0
+
+Inlet_Op = 'Off'
+Dispense_On = False
 
 # --- GUI Functions --- #
 
@@ -59,8 +68,6 @@ def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
 
 
-
-
 # --- Aux - State Functions --- #
 
 def Get_Time_Now():
@@ -72,6 +79,7 @@ def Get_Tank_Height():                                          #function called
         print('Scale ht:' + str(scale_height))                  #prints output
         Desired_Height1.config(text = scale_height)             #configures label with updated value
         window.update()                                         #updates window (optional?)
+        return scale_height
    else:
        pass
 
@@ -81,17 +89,19 @@ def Dispense(Dispense_Button):
         if (Dispense_Button == "On"):
             forget(Dispense_on); retrieve(Dispense_off, 300, 15)
             print('dispense on')
-            Dispense_State = 'On'; #return Dispense_State
+            Dispense_State = 'On'; 
             Dispense_On = True
 
         else:
             forget(Dispense_off); retrieve(Dispense_on, 200, 15)
             print('dispense off')
-            Dispense_State = 'Off'; #return Dispense_State
+            Dispense_State = 'Off'; 
             Dispense_On = False
 
-        #return Dispense_On
+        
         Dispense_Mode1.config(text = Dispense_State)
+        return Dispense_On
+    
     else:
         pass
 
@@ -141,48 +151,54 @@ def Start():
     global Start_Time1; Start_Time1 = Get_Time_Now()
     global Start_Time2; Start_Time2 = Get_Time_Now()
     Start_Button.place_forget()
-    #while (2>1):
-        #window.update()
-        ####### THIS IS WHERE STATE FUNCTIONS WILL GO ###########
-            ### Control_Task()
-            ###
-
+    while (2>1):
+        window.update()
+        Control_Task()
 
     print('start button')
 
 
 ### --- This is the new Control Function for State Org. --- ###
 ### --- This is still in progress
-# def Control_Task():
-#     State = Next_State
+def Control_Task():
+    global Start_Time1
+    global Inlet_On
+    global Dispense_On
+    global Next_State
+    global State1
+    global State2
+    global Delay_Over
+    global Next_State1
+    global Next_State2
+    global current_height
 
-#     if (Get_Time_Now() - Start_Time1) >= 1:
-
-#         if State == "InletOffDispenseOff":
-
-
-
-            # if operation = on OR = auto & ht >= input ht. - 0.5
-                #inlet on = true
-            # else
-                #inlet on = false
-
-            # if dispense on = true & inlet on = true
-                # Next State =  InletOnDispenseOn
-
-            # elif inlet on = true
-                # Next State = InletOnDispenseOff
-
-            # elif dispense on = true
-                # Next state = InletOffDispenseOn
-
-            # if state = InletOnDispenseOff OR InletOnDispenseOn
-                # if operation = off OR operation = Auto & ht < input ht - 0.5
-                    # if state = InletOnDispenseOff
-                        # Next State = InletOffDispenseOff
-                    # else
-                        # Next State = InletOffDispenseOn
-
+    
+    State1 = Next_State1
+    State2 = Next_State2
+    
+    Get_Tank_Height()
+     
+    if (Get_Time_Now() - Start_Time1) >= 1:
+        Delay_Over = True
+               
+        if State1 == "InletOff": 
+            if ((Inlet_Op =='On') or (Inlet_Op == 'Auto' and (current_height >= scale_height - 0.5))):
+                Next_State1 = 'InletOn'
+            
+        if State1 == 'InletOn':
+            if Delay_Over == True:
+                current_height += 2
+            
+        if State2 =="DispenseOff":
+            if Dispense_On == True:
+                Next_State2 = 'DispenseOn'
+                
+        if State2 == 'DispenseOn':
+            if Delay_Over == True:
+                current_height -= 0.5
+                
+                
+            
 
 
 
