@@ -3,16 +3,20 @@ MCE 433 - Tank Control Project
 Authors: Austin Clark & Matthew Morgan
 
 Big Items Left:
-    1. State Logic Implementation  - Matt
-    2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)            - Austin
-    3. Warning/Error Messages on GUI - Matt
-    4. Compare to Requirements Document
+    1. State Logic Implementation  - Matt                                                       - Complete
+    2. Slider Functionality (Confirm Passes Data Correctly - need tkinter variable?)            - Complete
+    3. Warning/Error Messages on GUI - Matt                                                     - Complete
+    4. Compare to Requirements Document 
     5. Organize Variables, Functions, and Code Flow
 
 Small Refinement Items Left:
-    1. Tank can overfill past 100cm (Should it be a hard limit of 100?)
-    2. Tank increments in factors of a second (Should it be smaller)
-    3. Remove Confirm Height button anad corresponding logic
+    1. Tank can overfill past 100cm (Should it be a hard limit of 100?)                         - Complete
+    2. Tank increments in factors of a second (Should it be smaller)                            - N/A
+    3. Remove Confirm Height button and corresponding logic                                     - Complete
+    4. Radio are blocked before start                                                           - ???
+        1. Radio buttons cannot be selected (interacted with)?
+        2. The label indicated control mode should not be updated until start?
+        3. The logic behind the control mode is blocked until Start == True?
 
 """
 # --- Libraries Used --- #
@@ -110,25 +114,21 @@ def Dispense(Dispense_Button):
     else:
         pass
 
-
-
 def Inlet_State_Status(Inlet_State):
-    if(Start == True):
-        global Inlet_Op; Inlet_Op = 'Off'
-        print('inlet state statues:  ' + str(Inlet_State))
-        if Inlet_State == '1':
-            Inlet_Op = 'Off'
-        elif  Inlet_State == '2':
-            Inlet_Op = 'On'
-        elif Inlet_State == '3':
-            Inlet_Op = 'Auto'
-        print('inlet op: ' + Inlet_Op)
-        Control_label1.config(text = Inlet_Op)
-        return Inlet_Op
-    else:
-        pass
-
-
+    #if(Start == True):
+    global Inlet_Op; Inlet_Op = 'Off'
+    print('inlet state statues:  ' + str(Inlet_State))
+    if Inlet_State == '1':
+        Inlet_Op = 'Off'
+    elif  Inlet_State == '2':
+        Inlet_Op = 'On'
+    elif Inlet_State == '3':
+        Inlet_Op = 'Auto'
+    print('inlet op: ' + Inlet_Op)
+    Control_label1.config(text = Inlet_Op)
+    return Inlet_Op
+    #else:
+    #    pass
 
 def Warning_Status():
     if (current_height >= 95.0):                        #set warning labels (high)
@@ -145,8 +145,6 @@ def Warning_Status():
     Warnings.config(text = flag)
 
 
-
-
 # --- State Logic --- #
 
 
@@ -159,9 +157,6 @@ def Start():
         time.sleep(0.1)
         window.update()
         Control_Task()
-
-    print('start button')
-
 
 ### --- This is the new Control Function for State Org. --- ###
 ### --- This is still in progress
@@ -203,9 +198,9 @@ def Control_Task():
             
         if State1 == 'InletOn':
             
-            if Inlet_Op == 'Off' or current_height >= 100:
+            if Inlet_Op == 'Off' or current_height >= 100.0:
                 Next_State1 = "InletOff"
-            
+
             elif Delay_Over == True:
                 
                 if (Inlet_Op == 'Auto' and current_height >= scale_height - 0.5):
@@ -213,6 +208,11 @@ def Control_Task():
                     
                 else:
                     current_height += 2
+                    
+                    if(current_height > 100.0):              #sets upper bound to prevent tank from filling past 100.0cm
+                        current_height = 100.0
+                    else:
+                        pass
             
         if State2 =="DispenseOff":
             
@@ -222,7 +222,7 @@ def Control_Task():
                 
         if State2 == 'DispenseOn':
             
-            if Dispense_On == False or current_height <= 0:
+            if Dispense_On == False or current_height == 0: #Sets lower bound to prevent tank from emptying below 0.0cm
                 Next_State2 = 'DispenseOff'
             
             elif Delay_Over == True:
@@ -231,9 +231,6 @@ def Control_Task():
     Warning_Status()
     Tank_Height1.config(text = current_height)
     print(current_height)
-                
-                
-            
 
 # --- GUI Buttons --- #
 
@@ -249,10 +246,10 @@ Dispense_on.place(x = 200, y = 15)
 Dispense_off = tk.Button(text='Dispense: Off', command = lambda: Dispense("Off"))
 Dispense_off.place(x = 300, y = 15)
 
-# --- GUI Scale Button --- #
+# --- GUI Scale Button --- # --- #For Troubleshooting
 
-Scale_Button = tk.Button(text='Confirm Height', command = lambda: Get_Tank_Height())   #confirm height button to set scale value as target
-Scale_Button.place(x = 450, y = 260)
+#Scale_Button = tk.Button(text='Confirm Height', command = lambda: Get_Tank_Height())   #confirm height button to set scale value as target
+#Scale_Button.place(x = 450, y = 260)
 
 # --- GUI Control Labels --- #
 
@@ -303,13 +300,11 @@ for (text, value) in radio_values.items():
     value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State.get()) ).place(x = 20, y = 120+int(value)*20)
     print('this is from radio button ' + str(Inlet_State.get()))
 
-
-
 # Slider Widget to set height
+
 Height_Scalar = tk.Scale(window, bg = 'light grey', variable = height, from_ = 100, to = 0, orient = 'vertical') #setup scale
 Height_Scalar.place(x = 475, y = 140)                                                                            #place scale
 
 
 window.after(10, forget(Dispense_off))              #Forget initial dispense_off widget button 
 window.mainloop()
-
