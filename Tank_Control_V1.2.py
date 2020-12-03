@@ -11,6 +11,10 @@ Notable flow rates of both states:
     Inlet Valve will intake at a rate of 2 cm/s
     Dispense Valve will output at a rate of 0.5 cm/s
     
+Notable warning thresholds:
+    Tank height exceeds 95cm - "Warning: High Tank Level"
+    Tank height below 20cm - "Warning: Low Tank level"
+    
 In order to beign the program, the Start button must be selected
 
 """
@@ -221,14 +225,10 @@ def Control_Task():
             elif Delay_Over == True:   
                 #current_height -= 0.5             
 
-###################
-
                 if (Inlet_Op == "Auto" and current_height <= scale_height - 0.5): #flag to make inlet op increment exactly at scale_height - 0.5
                     Next_State1 = "InletOn"
                 else:
                     current_height -= 0.5
-
-#######################
                     
 
     Warning_Status()
