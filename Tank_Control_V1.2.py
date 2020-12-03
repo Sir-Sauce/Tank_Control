@@ -215,7 +215,6 @@ def Control_Task():
             if Dispense_On == True:
                 
                 Next_State2 = 'DispenseOn'
-                print('THIS IS NOW ON YOO')
                 
         if State2 == 'DispenseOn':
             
