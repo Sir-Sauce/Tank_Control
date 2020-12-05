@@ -24,6 +24,8 @@ In order to beign the program, the Start button must be selected
 
 import time
 import tkinter as tk
+import serial           #imports serial library
+
 
 
 ### --- GUI Window Creation --- ###
@@ -33,6 +35,28 @@ window = tk.Tk()                                # initialize tkinter GUI
 window.title("Tank Control GUI")                # Labels GUI Window
 window.geometry('600x300')                      # Sets application window size
 window.configure(background = 'light gray')     # Set background of window
+
+### --- Establish Serial Communication --- ###
+
+
+
+
+
+
+                                                                    #opens port for serial device, sets baudrate
+serArduino = serial.Serial('/dev/cu.usbmodem1451101',38400)         #Austin's default port
+#serArduino = serial.Serial('/dev/cu.usbmodem1451301',38400)        #Matt's default port
+time.sleep(2)                                                       
+print(serArduino.name) 
+
+
+
+
+
+
+
+
+
 
 
 ### --- Variables --- ###
@@ -62,6 +86,8 @@ current_height = 50.0                           # Dynamically changes on inlet a
 
 # Close GUI Window
 def Exitf():
+    serArduino.close()  
+    time.sleep(0.1)
     window.destroy()
 
 
@@ -75,8 +101,50 @@ def retrieve(Widget, x, y):
     Widget.place(x = x, y = y)
 
 
-### --- Auxilery Functions --- ###
 
+
+
+
+
+
+
+
+
+### --- Serial Write Functions --- ###
+
+def Function_Select(usr_input):         # Function to determine serial data to send to arduino
+    print(usr_input)                    # Troubleshoot 
+    if(usr_input == '0'):               #Warning High
+        serArduino.write(b'0')
+        #print(')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '1'):             #Warning Low
+        serArduino.write(b'1')
+        #print('')       # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '2'):             #Warning Off
+        serArduino.write(b'2')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+
+    else:
+        pass
+    window.update()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### --- Auxilery Functions --- ###
 
 # Get program run time
 def Get_Time_Now():
@@ -133,16 +201,19 @@ def Inlet_State_Status(Inlet_State):
 def Warning_Status():
     if (current_height >= 95.0):                                #set warning labels (high)
         flag = "Warning: High Tank Level"
-        print('tank level high')
+        print('tank level high')    
+        Function_Select('0')                                    #sets both yellow LEDs high
 
     elif (current_height <= 20.0):                              #set warning labels (low)
         flag = "Warning: Low Tank Level"
         print('tank level low')
+        Function_Select('1')                                    #sets single yellow LED high
 
     else:
         flag = " "                                              #set warning labels (none)
+        Function_Select('2')                                    #clears yellow LEDs
         print("Warning: Tank Level nominal")
-    Warnings.config(text = flag)
+    Warnings.config(text = flag)    
 
 
 # --- State Logic --- #
