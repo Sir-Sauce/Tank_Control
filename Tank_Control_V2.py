@@ -1,15 +1,11 @@
 """
-MCE 433 - Tank Control Project
+MCE 433 - Final Project - Extension of Tank Control
 Authors: Austin Clark & Matthew Morgan
 
 This program encompasses a Fluid Tank Simulation
 The GUI includes two states of control, inlet valve and dispense valve
 Inlet valve control is given an Off (Default), On, and Automatic
 Do note, that the Automatic Control is dependent on the Tank Height Setting
-
-Notable flow rates of both states:
-    Inlet Valve will intake at a rate of 2 cm/s
-    Dispense Valve will output at a rate of 0.5 cm/s
     
 Notable warning thresholds:
     Tank height exceeds 95cm - "Warning: High Tank Level"
@@ -44,7 +40,7 @@ window.configure(background = 'light gray')     # Set background of window
 
 
                                                                     #opens port for serial device, sets baudrate
-serArduino = serial.Serial('/dev/cu.usbmodem1451101',38400)         #Austin's default port
+serArduino = serial.Serial('/dev/cu.usbmodem1431101',38400)         #Austin's default port
 #serArduino = serial.Serial('/dev/cu.usbmodem1451301',38400)        #Matt's default port
 time.sleep(2)                                                       
 print(serArduino.name) 
@@ -113,7 +109,7 @@ def retrieve(Widget, x, y):
 ### --- Serial Write Functions --- ###
 
 def Function_Select(usr_input):         # Function to determine serial data to send to arduino
-    print(usr_input)                    # Troubleshoot 
+    print(usr_input, "Serial Byte")                    # Troubleshoot 
     if(usr_input == '0'):               #Warning High
         serArduino.write(b'0')
         #print(')         # Troubleshoot 
@@ -124,6 +120,30 @@ def Function_Select(usr_input):         # Function to determine serial data to s
         time.sleep(0.1)
     elif(usr_input == '2'):             #Warning Off
         serArduino.write(b'2')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '3'):             #Height Indicator LEDS Off (0%)
+        serArduino.write(b'3')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '4'):             #Height Indicator LEDS <20%
+        serArduino.write(b'4')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '5'):             #Height Indicator LEDS <40%
+        serArduino.write(b'5')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '6'):             #Height Indicator LEDS <60%
+        serArduino.write(b'6')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '7'):             #Height Indicator LEDS <80%
+        serArduino.write(b'7')
+        #print('')         # Troubleshoot 
+        time.sleep(0.1)
+    elif(usr_input == '8'):             #Height Indicator LEDS >80%
+        serArduino.write(b'8')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
 
@@ -215,9 +235,28 @@ def Warning_Status():
         print("Warning: Tank Level nominal")
     Warnings.config(text = flag)    
 
+# --- Height indicator LED logic --- could be merged with warning status????? --- #
 
+def Height_Indicator():                                         
+    if (current_height == 0.0):                                  
+        Function_Select('3')                                    #clear tank height leds                         
+
+    elif (current_height > 0.0 and current_height <= 20.0):     #0-20%                            
+        Function_Select('4')                                    
+
+    elif (current_height > 20.0 and current_height <= 40.0):    #21-40%                                    
+        Function_Select('5')   
+
+    elif (current_height > 40.0 and current_height <= 60.0):    #41-60%                                     
+        Function_Select('6') 
+
+    elif (current_height > 60.0 and current_height <= 80.0):    #61-80%                              
+        Function_Select('7')  
+
+    else:                                         
+        Function_Select('8')                                    #81-100%
+    
 # --- State Logic --- #
-
 
 # Start the program button
 def Start():
@@ -302,7 +341,9 @@ def Control_Task():
                     current_height -= 0.5
                     
 
-    Warning_Status()
+    Warning_Status()                            #Sets warning flag and indicator LEDs
+    Height_Indicator()                          #Sets indicator LEDs based off tank height              
+
     Tank_Height1.config(text = current_height)
     print(current_height)
 
