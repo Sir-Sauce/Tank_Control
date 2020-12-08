@@ -109,6 +109,7 @@ def retrieve(Widget, x, y):
 ### --- Serial Write Functions --- ###
 
 def Function_Select(usr_input):         # Function to determine serial data to send to arduino
+    window.update()
     print(usr_input, "Serial Byte")                    # Troubleshoot 
     if(usr_input == '0'):               #Warning High
         serArduino.write(b'0')
@@ -146,10 +147,14 @@ def Function_Select(usr_input):         # Function to determine serial data to s
         serArduino.write(b'8')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
-
+    elif(usr_input == '9'):             #Sets Dispense_On boolean TRUE in arduino sketch
+        serArduino.write(b'9')
+        time.sleep(0.1)
+    elif(usr_input == '10'):            #Sets Dispense_On boolean FALSE in arduino sketch
+        serArduino.write(b'10')
+        time.sleep(0.1)
     else:
         pass
-    window.update()
 
 
 
@@ -239,22 +244,30 @@ def Warning_Status():
 
 def Height_Indicator():                                         
     if (current_height == 0.0):                                  
-        Function_Select('3')                                    #clear tank height leds                         
+        Function_Select('3')                                    #clear tank height leds  
+        print("Clear Indicator")                       
 
     elif (current_height > 0.0 and current_height <= 20.0):     #0-20%                            
-        Function_Select('4')                                    
+        Function_Select('4')
+        print("Level 1 Indicator")                                    
 
     elif (current_height > 20.0 and current_height <= 40.0):    #21-40%                                    
         Function_Select('5')   
+        print("Level 2 Indicator")                                    
 
     elif (current_height > 40.0 and current_height <= 60.0):    #41-60%                                     
-        Function_Select('6') 
+        Function_Select('6')
+        print("Level 3 Indicator")                                    
 
     elif (current_height > 60.0 and current_height <= 80.0):    #61-80%                              
         Function_Select('7')  
+        print("Level 4 Indicator")                                    
 
     else:                                         
         Function_Select('8')                                    #81-100%
+        print("Level 5 Indicator")                                    
+
+    
     
 # --- State Logic --- #
 
@@ -321,14 +334,16 @@ def Control_Task():
     
             
         if State2 =="DispenseOff":
+            Function_Select('10')   #Dispense off setting to arduino
             
             if Dispense_On == True:
                 
                 Next_State2 = 'DispenseOn'
-                print('THIS IS NOW ON YOO')
+                #print('THIS IS NOW ON YOO')
                 
         if State2 == 'DispenseOn':
-            
+            Function_Select('9')    #Dispense on setting to arduino
+
             if Dispense_On == False or current_height == 0: #Sets lower bound to prevent tank from emptying below 0.0cm
                 Next_State2 = 'DispenseOff'
             
@@ -338,6 +353,7 @@ def Control_Task():
                 if (Inlet_Op == "Auto" and current_height <= scale_height - 0.5): #flag to make inlet op increment exactly at scale_height - 0.5
                     Next_State1 = "InletOn"
                 else:
+                    
                     current_height -= 0.5
                     
 
