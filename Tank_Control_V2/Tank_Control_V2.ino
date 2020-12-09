@@ -5,9 +5,11 @@ int butPin = 12;
 unsigned long previousTime = 0;
 unsigned long previousTime2 = 0;
 unsigned long currentTime = 0;
+unsigned long currentTime2 = 0;
 unsigned long counter = 0;
-//unsigned long counter2 = 0;
+unsigned long counter2 = 1;
 char serialData;
+boolean buzzOp = false;
 
 int WarningFlag = 2;
 int HeightFlag = 3;
@@ -38,7 +40,9 @@ void setup() {
 
 void loop() {
   currentTime = millis();                           //Start Timer
+  currentTime2 = millis();
   Timer_Counter();                                  //Timer & Counter for Dispense LED blink
+  Timer_Counter2();
   delay(10);
 
 
@@ -50,55 +54,38 @@ void loop() {
     else if (serialData == '1') {
       HeightIndicator();
     }
+    else if (serialData == '2') {
+      SetDispenseState();
+    }
+    else if (serialData == '3') {
+      tone(10, 392, 3000);
+      //      currentTime2 = millis();
+      //      previousTime2 = currentTime2;
+      //      digitalWrite(buzPin, HIGH);
+
+    }
+    else if (serialData == '4') {
+      buzzOp = true;
+      counter2 = 1;
+    }
+
+    else { }
+  }
+  DispenseIndicator();
+
+  //Serial.print(buzzOp); Serial.println(" buzzer state");
+  //Serial.println(counter2);
+  if (buzzOp == true) {
+    if (counter2 % 2 == 0) {
+      tone(10, 392);
+    }
     else {
+      noTone(10);
     }
   }
+
 }
 
-//    switch (serialData) {             //Sets Task State based on serial data
-//      case 0:
-//        //WarningFlag = WarningHigh;
-//        SetWarning(0);
-//        break;
-//      case 1:
-//        WarningFlag = WarningLow;
-//        break;
-//      case 2:
-//        WarningFlag = WarningOff;
-//        break;
-//        //      case 3:
-//        //        HeightFlag = TankEmpty;
-//        //        break;
-//        //      case 4:
-//        //        HeightFlag = Tank20;
-//        //        break;
-//        //      case 5:
-//        //        HeightFlag = Tank40;
-//        //        break;
-//        //      case 6:
-//        //        HeightFlag = Tank60;
-//        //        break;
-//        //      case 7:
-//        //        HeightFlag = Tank80;
-//        //        break;
-//        //      case 8:
-//        //        HeightFlag = Tank100;
-//        //        break;
-//        //      case 9:
-//        //        DispenseState = DispenseOff;
-//        //        break;
-//        //      case 10:
-//        //        DispenseState = DispenseOn;
-//        //        break;
-//    }
-//    //Serial.print(DispenseState); Serial.println(" test");
-//    //SetWarning();
-//    //HeightIndicator();
-//  }
-//DispenseIndicator();
-//This is where button and potentiometer logic go
-//
-//
 
 void SetWarning() {
   serialData = Serial.read();
@@ -159,8 +146,18 @@ void HeightIndicator() {
 }
 
 
+void SetDispenseState() {
+  serialData = Serial.read();
+  switch (serialData) {
+    case '0':
+      DispenseState = DispenseOff;
+    case '1':
+      DispenseState = DispenseOn;
+  }
+}
+
 void DispenseIndicator() {
-  Serial.println(DispenseState);
+  //Serial.println(DispenseState);
   if (DispenseState == 10 && counter == 0) {           //Switch case for dispense state
     digitalWrite(9, LOW);                                   //LED blink Off
   }
@@ -175,74 +172,21 @@ void DispenseIndicator() {
   }
 }
 
-
-
 void Timer_Counter() {
   if ((currentTime - previousTime) >= 1000) {      //Sets Task2 counter
     counter++;
     previousTime = currentTime;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Example 2 - Receive with an end-marker
-
-//const byte numChars = 32;
-//char receivedChars[numChars];   // an array to store the received data
-//
-//boolean newData = false;
-//
-//
-//void loop() {
-//    recvWithEndMarker();
-//    showNewData();
-//}
-//
-//void recvWithEndMarker() {
-//    static byte ndx = 0;
-//    char endMarker = '\n';
-//    char rc;
-//
-//    while (Serial.available() > 0 && newData == false) {
-//        rc = Serial.read();
-//
-//        if (rc != endMarker) {
-//            receivedChars[ndx] = rc;
-//            ndx++;
-//            if (ndx >= numChars) {
-//                ndx = numChars - 1;
-//            }
-//        }
-//        else {
-//            receivedChars[ndx] = '\0'; // terminate the string
-//            ndx = 0;
-//            newData = true;
-//        }
-//    }
-//}
-//
-//void showNewData() {
-//    if (newData == true) {
-//        Serial.print("This just in ... ");
-//        Serial.println(receivedChars);
-//        newData = false;
-//    }
-//}
+void Timer_Counter2() {
+  if ((currentTime2 - previousTime2) >= 400) {      //Sets Task2 counter
+    counter2++;
+    previousTime2 = currentTime2;
+  }
+  if (counter2 >= 9) {
+    buzzOp = false;
+    counter2 = 1;
+    noTone(10);
+    //return buzzOp;
+  }
+}

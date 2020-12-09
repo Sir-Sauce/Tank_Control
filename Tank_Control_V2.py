@@ -33,14 +33,10 @@ window.configure(background = 'light gray')     # Set background of window
 
 ### --- Establish Serial Communication --- ###
                                                                     #opens port for serial device, sets baudrate
-serArduino = serial.Serial('/dev/cu.usbmodem1431101',38400)         #Austin's default port
+serArduino = serial.Serial('/dev/cu.usbmodem1451101',38400)         #Austin's default port
 #serArduino = serial.Serial('/dev/cu.usbmodem1451301',38400)        #Matt's default port
 time.sleep(2)                                                       
 print(serArduino.name) 
-#serArduino.write(b'2')
-
-
-
 
 
 
@@ -70,6 +66,7 @@ height = tk.DoubleVar()                         # variable set by user as target
 height.set(50.0)                                # Initial Slider Scale to 50.0
 scale_height = 50.0                             # Initial Slider Label to 50.0
 current_height = 50.0                           # Dynamically changes on inlet and outlet flow
+buzzerOp = False                                # Used to set off buzzer (one time) in auto mode
 
 
 ### --- GUI Functions --- ###
@@ -178,9 +175,10 @@ def Get_Tank_Height():
 # From GUI input, turn dispense on/off
 def Dispense(Dispense_Button):
     global Dispense_On
+    serArduino.write(b'2')                                          #Triggers Task 4 (uses serial write lines below)
     
     if (Dispense_Button == "On"):
-        serArduino.write(b'9')                                      #Dispense on setting to arduino
+        serArduino.write(b'1')                                      #Dispense on setting to arduino
         forget(Dispense_on); retrieve(Dispense_off, 300, 15)
         print('dispense on')
         Dispense_State = 'On'; 
@@ -188,7 +186,7 @@ def Dispense(Dispense_Button):
         
 
     else:
-        serArduino.write(b'10')                                     #Dispense off setting to arduino
+        serArduino.write(b'0')                                     #Dispense off setting to arduino
         forget(Dispense_off); retrieve(Dispense_on, 200, 15)
         print('dispense off')
         Dispense_State = 'Off'; 
@@ -205,8 +203,10 @@ def Inlet_State_Status(Inlet_State):
         Inlet_Op = 'Off'
     elif  Inlet_State == '2':
         Inlet_Op = 'On'
+        serArduino.write(b'4')                                  #Triggers Task 6 in arduino sketch
     elif Inlet_State == '3':
         Inlet_Op = 'Auto'
+        buzzerOp = False
     print('inlet op: ' + Inlet_Op)
     Control_label1.config(text = Inlet_Op)
     return Inlet_Op
@@ -216,19 +216,16 @@ def Inlet_State_Status(Inlet_State):
 def Warning_Status():
     if (current_height >= 95.0):                                #set warning labels (high)
         flag = "Warning: High Tank Level"    
-        #Function_Select('0')                                   #sets both yellow LEDs high
         serArduino.write(b'0')                                  #writes serial byte to arduino
         print('tank level high')
 
     elif (current_height <= 20.0):                              #set warning labels (low)
         flag = "Warning: Low Tank Level"
-        #Function_Select('1')                                   #sets single yellow LED high
         serArduino.write(b'1')                                  #writes serial byte to arduino
         print('tank level low')
 
     else:
         flag = " "                                              #set warning labels (none)
-        #Function_Select('2')                                   #clears yellow LEDs
         serArduino.write(b'2')                                  #writes serial byte to arduino
         print("Warning: Tank Level nominal")
 
@@ -289,6 +286,7 @@ def Control_Task():
     global current_height
     global height
     global scale_height
+    global buzzerOp
     
     scale_height = height.get()
     State1 = Next_State1
@@ -317,6 +315,11 @@ def Control_Task():
                 
             
                 if (Inlet_Op == 'Auto' and current_height > scale_height - 0.5):   #should be > not >= (inlet valve open at scale_height -0.5cm)
+
+                    if (buzzerOp == False):
+                        serArduino.write(b'3')               #Task 5 serial write buzzer high for 3 sec
+                        buzzerOp == True
+
                     Next_State1 = 'InletOff'        
                             
                 else:
