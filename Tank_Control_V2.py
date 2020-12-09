@@ -26,24 +26,19 @@ import serial           #imports serial library
 
 ### --- GUI Window Creation --- ###
 
-
 window = tk.Tk()                                # initialize tkinter GUI
 window.title("Tank Control GUI")                # Labels GUI Window
 window.geometry('600x300')                      # Sets application window size
 window.configure(background = 'light gray')     # Set background of window
 
 ### --- Establish Serial Communication --- ###
-
-
-
-
-
-
                                                                     #opens port for serial device, sets baudrate
 serArduino = serial.Serial('/dev/cu.usbmodem1431101',38400)         #Austin's default port
 #serArduino = serial.Serial('/dev/cu.usbmodem1451301',38400)        #Matt's default port
 time.sleep(2)                                                       
 print(serArduino.name) 
+#serArduino.write(b'2')
+
 
 
 
@@ -107,12 +102,15 @@ def retrieve(Widget, x, y):
 
 
 ### --- Serial Write Functions --- ###
+### --- Will be integrated into all other logic --- ###
 
+'''
 def Function_Select(usr_input):         # Function to determine serial data to send to arduino
     window.update()
     print(usr_input, "Serial Byte")                    # Troubleshoot 
     if(usr_input == '0'):               #Warning High
         serArduino.write(b'0')
+        print('Sent Serial Byte')
         #print(')         # Troubleshoot 
         time.sleep(0.1)
     elif(usr_input == '1'):             #Warning Low
@@ -147,26 +145,15 @@ def Function_Select(usr_input):         # Function to determine serial data to s
         serArduino.write(b'8')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
-    elif(usr_input == '9'):             #Sets Dispense_On boolean TRUE in arduino sketch
+    elif(usr_input == '9'):             #Sets Dispense_On  RUE in arduino sketch
         serArduino.write(b'9')
         time.sleep(0.1)
-    elif(usr_input == '10'):            #Sets Dispense_On boolean FALSE in arduino sketch
+    elif(usr_input == '10'):            #Sets Dispense_On FALSE in arduino sketch
         serArduino.write(b'10')
         time.sleep(0.1)
     else:
         pass
-
-
-
-
-
-
-
-
-
-
-
-
+'''
 
 
 ### --- Auxilery Functions --- ###
@@ -193,12 +180,15 @@ def Dispense(Dispense_Button):
     global Dispense_On
     
     if (Dispense_Button == "On"):
+        serArduino.write(b'9')                                      #Dispense on setting to arduino
         forget(Dispense_on); retrieve(Dispense_off, 300, 15)
         print('dispense on')
         Dispense_State = 'On'; 
         Dispense_On = True
+        
 
     else:
+        serArduino.write(b'10')                                     #Dispense off setting to arduino
         forget(Dispense_off); retrieve(Dispense_on, 200, 15)
         print('dispense off')
         Dispense_State = 'Off'; 
@@ -225,59 +215,62 @@ def Inlet_State_Status(Inlet_State):
 # Check tank height and display warning if over/under limits
 def Warning_Status():
     if (current_height >= 95.0):                                #set warning labels (high)
-        flag = "Warning: High Tank Level"
-        print('tank level high')    
-        Function_Select('0')                                    #sets both yellow LEDs high
+        flag = "Warning: High Tank Level"    
+        #Function_Select('0')                                   #sets both yellow LEDs high
+        serArduino.write(b'0')                                  #writes serial byte to arduino
+        print('tank level high')
 
     elif (current_height <= 20.0):                              #set warning labels (low)
         flag = "Warning: Low Tank Level"
+        #Function_Select('1')                                   #sets single yellow LED high
+        serArduino.write(b'1')                                  #writes serial byte to arduino
         print('tank level low')
-        Function_Select('1')                                    #sets single yellow LED high
 
     else:
         flag = " "                                              #set warning labels (none)
-        Function_Select('2')                                    #clears yellow LEDs
+        #Function_Select('2')                                   #clears yellow LEDs
+        serArduino.write(b'2')                                  #writes serial byte to arduino
         print("Warning: Tank Level nominal")
+
     Warnings.config(text = flag)    
 
 # --- Height indicator LED logic --- could be merged with warning status????? --- #
 
 def Height_Indicator():                                         
-    if (current_height == 0.0):                                  
-        Function_Select('3')                                    #clear tank height leds  
-        print("Clear Indicator")                       
+    if (current_height == 0.0):                                 #0%      
+        print("Clear Indicator")       
+        serArduino.write(b'0')                
 
-    elif (current_height > 0.0 and current_height <= 20.0):     #0-20%                            
-        Function_Select('4')
-        print("Level 1 Indicator")                                    
+    elif (current_height > 0.0 and current_height <= 20.0):     #1-20%                            
+        print("Level 1 Indicator")  
+        serArduino.write(b'1')                                  
 
     elif (current_height > 20.0 and current_height <= 40.0):    #21-40%                                    
-        Function_Select('5')   
-        print("Level 2 Indicator")                                    
+        print("Level 2 Indicator") 
+        serArduino.write(b'2')                                   
 
     elif (current_height > 40.0 and current_height <= 60.0):    #41-60%                                     
-        Function_Select('6')
-        print("Level 3 Indicator")                                    
+        print("Level 3 Indicator")
+        serArduino.write(b'3')                                    
 
     elif (current_height > 60.0 and current_height <= 80.0):    #61-80%                              
-        Function_Select('7')  
-        print("Level 4 Indicator")                                    
+        print("Level 4 Indicator")   
+        serArduino.write(b'4')                                 
 
-    else:                                         
-        Function_Select('8')                                    #81-100%
-        print("Level 5 Indicator")                                    
+    else:                                                       #81-100%
+        print("Level 5 Indicator")  
+        serArduino.write(b'5')                                  
 
-    
-    
 # --- State Logic --- #
 
 # Start the program button
+
 def Start():
     global Start; Start = True
     global Start_Time1; Start_Time1 = Get_Time_Now()
     Start_Button.place_forget()
     while (2>1):
-        time.sleep(0.1)
+        time.sleep(0.2)
         window.update()
         Control_Task()
 
@@ -334,7 +327,7 @@ def Control_Task():
     
             
         if State2 =="DispenseOff":
-            Function_Select('10')   #Dispense off setting to arduino
+            #Function_Select('10')   #Dispense off setting to arduino
             
             if Dispense_On == True:
                 
@@ -342,7 +335,7 @@ def Control_Task():
                 #print('THIS IS NOW ON YOO')
                 
         if State2 == 'DispenseOn':
-            Function_Select('9')    #Dispense on setting to arduino
+            #Function_Select('9')    #Dispense on setting to arduino
 
             if Dispense_On == False or current_height == 0: #Sets lower bound to prevent tank from emptying below 0.0cm
                 Next_State2 = 'DispenseOff'
@@ -357,8 +350,8 @@ def Control_Task():
                     current_height -= 0.5
                     
 
-    Warning_Status()                            #Sets warning flag and indicator LEDs
-    Height_Indicator()                          #Sets indicator LEDs based off tank height              
+    serArduino.write(b'0'); Warning_Status()     #Sets warning flag and indicator LEDs
+    serArduino.write(b'1'); Height_Indicator()     #Sets indicator LEDs based off tank height              
 
     Tank_Height1.config(text = current_height)
     print(current_height)
