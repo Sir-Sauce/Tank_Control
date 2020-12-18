@@ -1,6 +1,9 @@
 int ledPin [] = {2, 3, 4, 5, 6, 7, 8, 9};
 int buzPin = 10;
 int butPin = 12;
+int WarningFlag = 2;
+int HeightFlag = 3;
+int SerialReadCount = 0;
 
 unsigned long previousTime = 0;
 unsigned long previousTime2 = 0;
@@ -8,28 +11,53 @@ unsigned long currentTime = 0;
 unsigned long currentTime2 = 0;
 unsigned long counter = 0;
 unsigned long counter2 = 1;
+
 char serialData;
+
 boolean buzzOp = false;
+boolean DispenseOn = false;
 
-int WarningFlag = 2;
-int HeightFlag = 3;
-int DispenseState = 9;
+// State1; //Next_State1;
+//byte State2, Next_State2;
+//byte State3, Next_State3;
+//byte State4, Next_State4;
+//byte State5, Next_State5;
 
-#define WarningHigh 0;
-#define WarningLow 1;
-#define WarningOff 2;
-#define TankEmpty 3;
-#define Tank20 4;
-#define Tank40 5;
-#define Tank60 6;
-#define Tank80 7;
-#define Tank100 8;
-#define DispenseOff 9;
-#define DispenseOn 10;
 
+#define StartState 1
+#define InState 2
+#define MidState 3
+#define OutState 4
+#define MoveState 5
+
+
+#define WarningHigh 0
+#define WarningLow 1
+#define WarningOff 2
+#define TankEmpty 3
+#define Tank20 4
+#define Tank40 5
+#define Tank60 6
+#define Tank80 7
+#define Tank100 8
+
+
+byte State1;
+//byte State2 = StartState;
+//byte State3 = StartState;
+//byte State4 = StartState;
+//byte State5 = StartState;
+
+byte Next_State1;
 
 void setup() {
   Serial.begin(38400);                    //initializes serial communication
+
+  byte Next_State1 = StartState;
+
+  
+  pinMode(12, INPUT_PULLUP);
+  
   for (int i = 0; i < 8; i++) {
     pinMode(ledPin[i], OUTPUT);           //initializing all ledPins as OUTPUT
     for (int i = 0; i < 8; i++) {
@@ -44,68 +72,90 @@ void loop() {
   Timer_Counter();                                  //Timer & Counter for Dispense LED blink
   Timer_Counter2();
   delay(10);
+  serialData = '0';
 
-
+  
+  if (digitalRead(12) == HIGH) {
+    delay(100);
+    Serial.println("Dispense Button Activated");
+    //Serial.write(1);
+  }
+  
   if (Serial.available() > 0) {          //Waiting State - Checks for serial data
     serialData = Serial.read();          //Gets Task command from python
-    if (serialData == '0') {
-      SetWarning();
-    }
-    else if (serialData == '1') {
+       
+    switch (serialData) {            //Switch case for warning state
+    case '1':
       HeightIndicator();
-    }
-    else if (serialData == '2') {
-      SetDispenseState();
-    }
-    else if (serialData == '3') {
-      tone(10, 392, 3000);
-      //      currentTime2 = millis();
-      //      previousTime2 = currentTime2;
-      //      digitalWrite(buzPin, HIGH);
-
-    }
-    else if (serialData == '4') {
+      break;
+    case '2':
+      SetDispenseState();   
+      break;
+    case '3':
+      tone(10, 392, 12000);
+      break;
+    case '4':
       buzzOp = true;
       counter2 = 1;
-    }
-
-    else { }
-  }
-  DispenseIndicator();
-
-  //Serial.print(buzzOp); Serial.println(" buzzer state");
-  //Serial.println(counter2);
-  if (buzzOp == true) {
-    if (counter2 % 2 == 0) {
-      tone(10, 392);
-    }
-    else {
-      noTone(10);
-    }
-  }
-
-}
-
-
-void SetWarning() {
-  serialData = Serial.read();
-  switch (serialData) {            //Switch case for warning state
-    case '0':                         //High level warning
+      break;  
+    case '5':                         //High level warning
       digitalWrite(7, HIGH);
       digitalWrite(8, HIGH);
       break;
-    case '1':                         //low level warning
+    case '6':                         //low level warning
       digitalWrite(7, HIGH);
       digitalWrite(8, LOW);
       break;
-    case '2':                         //nominal tank level
+    case '7':                         //nominal tank level
       digitalWrite(7, LOW);
       digitalWrite(8, LOW);
       break;
+      
+        }
+      }
+
+    if (DispenseOn == true){
+      
+    }
+
+    DispenseIndicator();   
+    
+    if (buzzOp == true) {
+      if (counter2 % 2 == 0) {
+        tone(10, 392);
+        }
+      else {
+        noTone(10);
+    }
+  }  
+}      
+      
+
+
+//### ---  Tank Height Warning --- ###
+void SetWarning() {
+  
+  serialData = Serial.read();
+  switch (serialData) {            //Switch case for warning state
+    case '5':                         //High level warning
+      digitalWrite(7, HIGH);
+      digitalWrite(8, HIGH);
+      break;
+    case '6':                         //low level warning
+      digitalWrite(7, HIGH);
+      digitalWrite(8, LOW);
+      break;
+    case '7':                         //nominal tank level
+      digitalWrite(7, LOW);
+      digitalWrite(8, LOW);
+      break;
+
   }
-}
+}   
 
+ 
 
+//### --- Tank Level Indicator --- ###
 void HeightIndicator() {
   serialData = Serial.read();
   switch (serialData) {             //Switch case for warning state
@@ -150,27 +200,29 @@ void SetDispenseState() {
   serialData = Serial.read();
   switch (serialData) {
     case '0':
-      DispenseState = DispenseOff;
+      DispenseOn = false;
+      Serial.println("Dispense OFF");
+      break;
     case '1':
-      DispenseState = DispenseOn;
+      DispenseOn = true;
+      Serial.println("Dispense ON");
+      break;
   }
 }
 
 void DispenseIndicator() {
   //Serial.println(DispenseState);
-  if (DispenseState == 10 && counter == 0) {           //Switch case for dispense state
+  if (DispenseOn == true && counter == 0) {           //Switch case for dispense state
     digitalWrite(9, LOW);                                   //LED blink Off
   }
-  else if (DispenseState == 10 && counter == 1) {           //LED blink On
+  else if (DispenseOn == true && counter == 1) {           //LED blink On
     digitalWrite(9, HIGH);
   }
-  else {
+  else if(DispenseOn == false || counter == 2){
     digitalWrite(9, LOW);                                   //LED Off
-  }
-  if (counter == 2) {
     counter = 0;
   }
-}
+ }
 
 void Timer_Counter() {
   if ((currentTime - previousTime) >= 1000) {      //Sets Task2 counter

@@ -1,4 +1,9 @@
 """
+
+THIS CODE IS OVERALL INCOMPLETE --- NEEDS INTEGRATION WITH ITEMS
+    7 AND 8 
+
+
 MCE 433 - Final Project - Extension of Tank Control
 Authors: Austin Clark & Matthew Morgan
 
@@ -24,6 +29,11 @@ import serial           #imports serial library
 
 
 
+### --- Global Variables --- ###
+next_Byte = '0' 
+dispenseButtonOn = False
+
+
 ### --- GUI Window Creation --- ###
 
 window = tk.Tk()                                # initialize tkinter GUI
@@ -33,7 +43,7 @@ window.configure(background = 'light gray')     # Set background of window
 
 ### --- Establish Serial Communication --- ###
                                                                     #opens port for serial device, sets baudrate
-serArduino = serial.Serial('/dev/cu.usbmodem1451101',38400)         #Austin's default port
+serArduino = serial.Serial('COM3',38400)         #Austin's default port
 #serArduino = serial.Serial('/dev/cu.usbmodem1451301',38400)        #Matt's default port
 time.sleep(2)                                                       
 print(serArduino.name) 
@@ -53,8 +63,10 @@ radio_values = {"Off"  : "1",
                 "Auto" : "3"}                   # Radio Button Index
 State1 = " "                                    # State 1 status - inlet operations
 State2 = " "                                    # State 2 status - dispense operations
+State3 = " "                                    # State 3 status - button dispense operation
 Next_State1 = "InletOff"                        # Next status for state 1
 Next_State2 = "DispenseOff"                     # Next status for state 2
+Next_State3 = "WarningOff"                     # Next status for state 2
 Start_Time1 = 0                                 # Store time for start of operation
 Dispense_State = "Off"                          # Initial Dispense state is off
 Control_Mode = "Off"                            # Initial Control Mode
@@ -67,7 +79,7 @@ height.set(50.0)                                # Initial Slider Scale to 50.0
 scale_height = 50.0                             # Initial Slider Label to 50.0
 current_height = 50.0                           # Dynamically changes on inlet and outlet flow
 buzzerOp = False                                # Used to set off buzzer (one time) in auto mode
-
+updateHeight = 0
 
 ### --- GUI Functions --- ###
 
@@ -101,56 +113,70 @@ def retrieve(Widget, x, y):
 ### --- Serial Write Functions --- ###
 ### --- Will be integrated into all other logic --- ###
 
-'''
+"""
 def Function_Select(usr_input):         # Function to determine serial data to send to arduino
     window.update()
-    print(usr_input, "Serial Byte")                    # Troubleshoot 
+    global next_Byte
+    print(usr_input, "Serial Byte")  
+                  # Troubleshoot 
     if(usr_input == '0'):               #Warning High
+        next_Byte = '0'
         serArduino.write(b'0')
         print('Sent Serial Byte')
         #print(')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '1'):             #Warning Low
         serArduino.write(b'1')
         #print('')       # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '2'):             #Warning Off
         serArduino.write(b'2')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '3'):             #Height Indicator LEDS Off (0%)
         serArduino.write(b'3')
-        #print('')         # Troubleshoot 
+        #print('')        # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '4'):             #Height Indicator LEDS <20%
         serArduino.write(b'4')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '5'):             #Height Indicator LEDS <40%
         serArduino.write(b'5')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '6'):             #Height Indicator LEDS <60%
         serArduino.write(b'6')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '7'):             #Height Indicator LEDS <80%
         serArduino.write(b'7')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '8'):             #Height Indicator LEDS >80%
         serArduino.write(b'8')
         #print('')         # Troubleshoot 
         time.sleep(0.1)
+        
     elif(usr_input == '9'):             #Sets Dispense_On  RUE in arduino sketch
         serArduino.write(b'9')
         time.sleep(0.1)
+        
     elif(usr_input == '10'):            #Sets Dispense_On FALSE in arduino sketch
         serArduino.write(b'10')
         time.sleep(0.1)
+        
     else:
         pass
-'''
+"""
 
 
 ### --- Auxilery Functions --- ###
@@ -175,10 +201,14 @@ def Get_Tank_Height():
 # From GUI input, turn dispense on/off
 def Dispense(Dispense_Button):
     global Dispense_On
-    serArduino.write(b'2')                                          #Triggers Task 4 (uses serial write lines below)
+    #global dispenseButtonOn
+    #serArduino.write(b'2')                                          #Triggers Task 4 (uses serial write lines below)
     
     if (Dispense_Button == "On"):
-        serArduino.write(b'1')                                      #Dispense on setting to arduino
+        
+        #serArduino.write(b'1')                                      #Dispense on setting to arduino
+        serArduino.write(b'21')
+
         forget(Dispense_on); retrieve(Dispense_off, 300, 15)
         print('dispense on')
         Dispense_State = 'On'; 
@@ -186,11 +216,15 @@ def Dispense(Dispense_Button):
         
 
     else:
-        serArduino.write(b'0')                                     #Dispense off setting to arduino
+        
+        #serArduino.write(b'0')                                     #Dispense off setting to arduino
+        serArduino.write(b'20')
+
         forget(Dispense_off); retrieve(Dispense_on, 200, 15)
         print('dispense off')
         Dispense_State = 'Off'; 
         Dispense_On = False
+        #dispenseButtonOn = False
 
     Dispense_Mode1.config(text = Dispense_State)
 
@@ -198,7 +232,7 @@ def Dispense(Dispense_Button):
 # Set Control Mode based upon Radio Button selection
 def Inlet_State_Status(Inlet_State):
     global Inlet_Op; Inlet_Op = 'Off'
-    print('inlet state statues:  ' + str(Inlet_State))
+    #print('inlet state statues:  ' + str(Inlet_State))
     if Inlet_State == '1':
         Inlet_Op = 'Off'
     elif  Inlet_State == '2':
@@ -207,76 +241,180 @@ def Inlet_State_Status(Inlet_State):
     elif Inlet_State == '3':
         Inlet_Op = 'Auto'
         buzzerOp = False
-    print('inlet op: ' + Inlet_Op)
+    #print('inlet op: ' + Inlet_Op)
     Control_label1.config(text = Inlet_Op)
     return Inlet_Op
 
 
 # Check tank height and display warning if over/under limits
 def Warning_Status():
+    global Next_State3
+    global State3
+    
+    State3 = Next_State3
+    
+    if State3 == "WarningOn":
+        if current_height<95 or current_height>20:
+            Next_State3 = "WarningOff"
+            serArduino.write(b'7')                                  #writes serial byte to arduino
+
+        else:
+            pass
+        
+    if State3 == "WarningOff":
+        if current_height>=95:
+            serArduino.write(b'5')                                  #writes serial byte to arduino
+            Next_State3 = "WarningOn"
+        elif current_height<=20:
+            serArduino.write(b'6')                                  #writes serial byte to arduino
+            Next_State3 = "WarningOn"
+    
+    
+    
+    
+    
+    
+    
+    """
+    global next_Byte
     if (current_height >= 95.0):                                #set warning labels (high)
         flag = "Warning: High Tank Level"    
-        serArduino.write(b'0')                                  #writes serial byte to arduino
+        serArduino.write(b'00')                                  #writes serial byte to arduino
+        #next_Byte = b'0'                                  #writes serial byte to arduino
         print('tank level high')
 
     elif (current_height <= 20.0):                              #set warning labels (low)
         flag = "Warning: Low Tank Level"
-        serArduino.write(b'1')                                  #writes serial byte to arduino
+        serArduino.write(b'01')                                  #writes serial byte to arduino
         print('tank level low')
-
+        #next_Byte = b'0'
     else:
         flag = " "                                              #set warning labels (none)
-        serArduino.write(b'2')                                  #writes serial byte to arduino
+        serArduino.write(b'02')                                  #writes serial byte to arduino
         print("Warning: Tank Level nominal")
-
-    Warnings.config(text = flag)    
-
+        #next_Byte = b'0'
+    Warnings.config(text = flag)
+    return next_Byte    
+    """
+    
 # --- Height indicator LED logic --- could be merged with warning status????? --- #
 
-def Height_Indicator():                                         
-    if (current_height == 0.0):                                 #0%      
+def Height_Indicator():  
+    global updateHeight 
+    if (current_height == 0.0 and updateHeight != 1):                                 #0%      
         print("Clear Indicator")       
-        serArduino.write(b'0')                
+        serArduino.write(b'10')
+        updateHeight = 1                
 
-    elif (current_height > 0.0 and current_height <= 20.0):     #1-20%                            
+    elif (current_height > 0.0 and current_height <= 20.0 and updateHeight != 2):     #1-20%                            
         print("Level 1 Indicator")  
-        serArduino.write(b'1')                                  
+        serArduino.write(b'11')                                  
+        updateHeight = 2                
 
-    elif (current_height > 20.0 and current_height <= 40.0):    #21-40%                                    
+    elif (current_height > 20.0 and current_height <= 40.0 and updateHeight != 3):    #21-40%                                    
         print("Level 2 Indicator") 
-        serArduino.write(b'2')                                   
+        serArduino.write(b'12')                                   
+        updateHeight = 3                
 
-    elif (current_height > 40.0 and current_height <= 60.0):    #41-60%                                     
+    elif (current_height > 40.0 and current_height <= 60.0 and updateHeight != 4):    #41-60%                                     
         print("Level 3 Indicator")
-        serArduino.write(b'3')                                    
+        serArduino.write(b'13')                                    
+        updateHeight = 4                
 
-    elif (current_height > 60.0 and current_height <= 80.0):    #61-80%                              
+    elif (current_height > 60.0 and current_height <= 80.0 and updateHeight != 5):    #61-80%                              
         print("Level 4 Indicator")   
-        serArduino.write(b'4')                                 
+        serArduino.write(b'14')                                 
+        updateHeight = 5                
 
-    else:                                                       #81-100%
+    elif (current_height > 80.0 and current_height <= 100.0 and updateHeight != 6):                                                       #81-100%
         print("Level 5 Indicator")  
-        serArduino.write(b'5')                                  
+        serArduino.write(b'15')                                  
+        updateHeight = 6                
+    else:
+        pass
+    
+    
+    
+###### --------- This is the new Dispense Function for the Magic Button --------- #########   
+def DispenseButton():
+    
+        #serArduino.flushInput()
+
+    if(serArduino.in_waiting>0):    
+        
+        serialArduino = serArduino.readline()
+        print(serialArduino)
+        
+        if(serialArduino == b'Dispense Button Activated\r\n'):
+            
+            Dispense('On')
+            
+            # if(serArduino.readline() != b'Dispense Button Activated\r\n'):
+            #     Dispense('Off')
+            #     #serArduino.flushInput()
+            #     break
+
+            # serArduino.write(b'21')
+
+            # forget(Dispense_on); retrieve(Dispense_off, 300, 15)
+            # print('dispense on')
+            # Dispense_State = 'On'; 
+            # Dispense_On = True  
+            
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            
+            serArduino.flushInput()
+
+        else:
+            pass
+            
+            #Dispense('Off')
+            
+            serArduino.write(b'20')
+
+            # forget(Dispense_off); retrieve(Dispense_on, 200, 15)
+            # print('dispense off')
+            # Dispense_State = 'Off'; 
+            # Dispense_On = False
+            # #dispenseButtonOn = False
+            
+
+            
+        #Dispense_Mode1.config(text = Dispense_State)
+       
+    else:
+        serialArduino = None
+        
 
 # --- State Logic --- #
 
 # Start the program button
 
 def Start():
+    
     global Start; Start = True
     global Start_Time1; Start_Time1 = Get_Time_Now()
+    global serialRead; serialRead = b'0'
+    global dispenseButtonOn
+    global Next_State2
+    global State2
+    global State3; 
+    global Dispense_On
+    global Dispense_State
+    
     Start_Button.place_forget()
     while (2>1):
         time.sleep(0.2)
         window.update()
         Control_Task()
-
-
+        
+     
 # State control function
 def Control_Task():
+    
     global Start_Time1
     global Inlet_On
-    global Dispense_On
+    global Dispense_On 
     global Next_State
     global State1
     global State2
@@ -287,11 +425,15 @@ def Control_Task():
     global height
     global scale_height
     global buzzerOp
+    global next_Byte
+    global dispenseButtonOn
     
     scale_height = height.get()
     State1 = Next_State1
     State2 = Next_State2
     Get_Tank_Height()
+    
+    DispenseButton()
     
     print(State1 + State2)
     print(Inlet_Op)
@@ -330,19 +472,30 @@ def Control_Task():
     
             
         if State2 =="DispenseOff":
-            #Function_Select('10')   #Dispense off setting to arduino
             
-            if Dispense_On == True:
+            if Dispense_On == True: # or dispenseButtonOn == True:
                 
                 Next_State2 = 'DispenseOn'
+                
+                #dispenseButtonOn = False
+                
+                #serArduino.write(b'2')
+                #serArduino.write(b'1')
+                
                 #print('THIS IS NOW ON YOO')
                 
         if State2 == 'DispenseOn':
-            #Function_Select('9')    #Dispense on setting to arduino
 
-            if Dispense_On == False or current_height == 0: #Sets lower bound to prevent tank from emptying below 0.0cm
+        
+            if Dispense_On == False or current_height == 0: # or dispenseButtonOn ==False: #Sets lower bound to prevent tank from emptying below 0.0cm
+                
                 Next_State2 = 'DispenseOff'
-            
+                
+                serArduino.write(b'20')
+
+                #serArduino.write(b'2')
+                #serArduino.write(b'0')
+                
             elif Delay_Over == True:   
                 #current_height -= 0.5             
 
@@ -351,11 +504,19 @@ def Control_Task():
                 else:
                     
                     current_height -= 0.5
+                    dispenseButtonOn = False
+                    
                     
 
-    serArduino.write(b'0'); Warning_Status()     #Sets warning flag and indicator LEDs
-    serArduino.write(b'1'); Height_Indicator()     #Sets indicator LEDs based off tank height              
+    #serArduino.write(b'0'); 
+    Warning_Status()     #Sets warning flag and indicator LEDs
+    #serArduino.write(b'1'); 
+    Height_Indicator()     #Sets indicator LEDs based off tank height 
 
+    #print(next_Byte)
+    #serArduino.write(str(next_Byte).encode('ascii'))         #Writes the next byte to serial com.      
+    #del next_Byte
+    
     Tank_Height1.config(text = current_height)
     print(current_height)
 
@@ -429,7 +590,7 @@ Dispense_Mode1.place(x = 350, y = 200)
 for (text, value) in radio_values.items():
     tk.Radiobutton(window, text = text, variable = Inlet_State,
     value = value, width = 10, command = lambda: Inlet_State_Status(Inlet_State.get()) ).place(x = 20, y = 120+int(value)*20)
-    print('this is from radio button ' + str(Inlet_State.get()))
+    #print('this is from radio button ' + str(Inlet_State.get()))
 
 
 # Slider Widget to set height
